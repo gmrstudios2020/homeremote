@@ -1,5 +1,7 @@
 # Installation
 
+> If your receiver, NAS audio stack, HDMI input, or Zone 2 routing differs from the reference system, complete [SETUP-GUIDE.md](SETUP-GUIDE.md) first. This page is the shortest path for installations that are already close to the tested topology.
+
 ## Requirements
 
 - Docker / Docker Compose on the NAS
