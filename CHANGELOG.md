@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Added a discovery-first setup guide for installations that differ from the reference hardware.
+- Added a setup worksheet and compatibility guide.
+- Added receiver adaptation documentation.
+- Added explicit guidance for adapting the receiver MAIN and Zone 2 source behavior on other Sony models.
+- Expanded `.env.example` with guidance for identifying host-specific values.
+
 ## 2026-08-25 - Known-good baseline
 
 - Added secure `remote.home` reverse proxy architecture.
