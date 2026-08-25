@@ -4,6 +4,14 @@ A self-hosted LAN remote for a Sony STR-ZA1100ES based AV system with TV/Blu-ray
 
 This repository is the cleaned, documented version of a working home deployment. Device addresses, TV PSKs, certificates, MAC addresses, and saved recordings are intentionally excluded from Git.
 
+## Start here if your hardware is different
+
+Do not copy the reference IP addresses, HDMI sink, audio GID, SAT/CATV routing, or other machine-specific values blindly. The project now includes a discovery-first setup path that walks through your own topology before deployment.
+
+Start with [Setup Guide](docs/SETUP-GUIDE.md), then fill out the [Setup Worksheet](docs/SETUP-WORKSHEET.md). See [Compatibility and Adaptation](docs/COMPATIBILITY.md) and [Receiver Adaptation](docs/RECEIVER-ADAPTATION.md) if your hardware differs from the reference system.
+
+The goal is to reproduce the behavior, not Gerard's exact wiring or network values.
+
 ## What it does
 
 - Sony-style responsive browser remote
@@ -77,17 +85,15 @@ The intercom implementation temporarily switches the receiver MAIN zone to SAT/C
 
 ## Quick start
 
-1. Copy `.env.example` to `.env` and enter your device addresses, TV PSK, Blu-ray MAC, LAN broadcast address, and PulseAudio sink.
-2. Copy or symlink the same `.env` into each service directory, or run Compose with `--env-file ../.env`.
-3. Deploy `intercom/` first and confirm `http://NAS_IP:8089/api/health` returns `{"ok":true,...}`.
-4. Deploy `remote/` and confirm `http://NAS_IP:8088` loads the remote.
-5. Create a local DNS record such as `remote.home -> NAS_IP`.
-6. Generate/install a trusted local certificate and place the certificate and key in `reverse-proxy/certs/` using the filenames documented in `docs/HTTPS.md`.
-7. Deploy `reverse-proxy/` and use `https://remote.home`.
+1. Read [Setup Guide](docs/SETUP-GUIDE.md).
+2. Complete [Setup Worksheet](docs/SETUP-WORKSHEET.md).
+3. Copy `.env.example` to `.env` and enter values you actually verified.
+4. Deploy Intercom first and test the complete physical audio path.
+5. Deploy the web remote and test each device integration independently.
+6. Configure local DNS and HTTPS only after the HTTP services work.
+7. Test browser recording and LIVE last.
 
-See [Installation](docs/INSTALLATION.md) for the complete procedure.
-
-Ready to publish? See [Publishing to GitHub](docs/GITHUB.md).
+For a close match to the reference hardware, see [Installation](docs/INSTALLATION.md). For a different receiver or wiring topology, see [Compatibility and Adaptation](docs/COMPATIBILITY.md).
 
 ## Persistent data
 
