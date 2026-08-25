@@ -37,3 +37,11 @@ LIVE follows the same routing sequence and restores the receiver when the sessio
 ## Announcement volume
 
 The configured percentage is applied to `paplay` before the signal leaves the NAS. It does not modify the Sonance gain structure or normal receiver listening volume.
+
+## Do not copy reference values blindly
+
+Values marked as tested are examples from the reference installation, not universal defaults. Use [SETUP-GUIDE.md](SETUP-GUIDE.md) to discover the correct values for your own equipment.
+
+## Receiver MAIN input caveat
+
+The current known-good backend physically switches the Sony receiver MAIN zone to SAT/CATV during Intercom playback because that is required on the tested STR-ZA1100ES. `INTERCOM_INPUT` configures the Zone 2 source, but changing the MAIN-zone source for a different receiver currently requires adapting `prepare_intercom_route()` / `set_main_input()` in `intercom/app.py`. See [RECEIVER-ADAPTATION.md](RECEIVER-ADAPTATION.md).
