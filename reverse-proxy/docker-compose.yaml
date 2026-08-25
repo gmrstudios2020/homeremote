@@ -1,0 +1,14 @@
+services:
+  remote-https:
+    image: nginx:alpine
+    container_name: remote-https
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      REMOTE_HOSTNAME: "${REMOTE_HOSTNAME:-remote.home}"
+      REMOTE_PORT: "${REMOTE_PORT:-8088}"
+      INTERCOM_PORT: "${INTERCOM_PORT:-8089}"
+    volumes:
+      - ./nginx.conf.template:/etc/nginx/templates/nginx.conf.template:ro
+      - ./certs:/etc/nginx/certs:ro
+    command: ["/bin/sh", "-c", "envsubst '$$REMOTE_HOSTNAME $$REMOTE_PORT $$INTERCOM_PORT' < /etc/nginx/templates/nginx.conf.template > /etc/nginx/nginx.conf && exec nginx -g 'daemon off;'"]

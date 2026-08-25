@@ -1,0 +1,5 @@
+FROM python:3.13-alpine
+WORKDIR /app
+COPY wol_server.py /app/wol_server.py
+ENV PYTHONUNBUFFERED=1
+CMD ["python", "/app/wol_server.py"]

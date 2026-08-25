@@ -1,0 +1,34 @@
+services:
+  sony-remote:
+    build:
+      context: .
+      dockerfile: Dockerfile.remote
+      no_cache: true
+    image: whole-house-remote-web:latest
+    container_name: sony-remote
+    restart: unless-stopped
+    ports:
+      - "${REMOTE_PORT:-8088}:80"
+    environment:
+      AVR_HOST: "${AVR_HOST}"
+      TV_HOST: "${TV_HOST}"
+      TV_PSK: "${TV_PSK}"
+      BDP_HOST: "${BDP_HOST}"
+      NAS_HOST: "${NAS_HOST}"
+      WOL_PORT: "${WOL_PORT:-8090}"
+    depends_on:
+      - bdp-wol
+
+  bdp-wol:
+    build:
+      context: .
+      dockerfile: Dockerfile.wol
+      no_cache: true
+    image: whole-house-remote-wol:latest
+    container_name: bdp-wol
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      BDP_MAC: "${BDP_MAC}"
+      LAN_BROADCAST: "${LAN_BROADCAST}"
+      WOL_PORT: "${WOL_PORT:-8090}"

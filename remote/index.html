@@ -1,0 +1,3087 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#0b0b0b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Sony Remote">
+<title>Sony AV Remote</title>
+<style>
+:root{--bg:#0b0b0b;--panel:#1c1c1c;--border:#383838;--text:#f4f4f4;--muted:#999;--blue:#2469d0;--red:#6b2020;--green:#176b39;--amber:#6a4a12}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+body{padding:calc(env(safe-area-inset-top) + 10px) 12px calc(env(safe-area-inset-bottom) + 16px)}
+.wrap{max-width:520px;margin:auto}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.tab{background:#151515;border:1px solid var(--border);min-height:48px}
+.tab.active{background:var(--blue);border-color:#477fda}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+h1{font-size:17px;margin:0}.ip{font-size:12px;color:var(--muted)}
+.label{font-size:11px;letter-spacing:.12em;color:var(--muted);margin:14px 2px 7px}
+.grid{display:grid;gap:9px}.g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+button{min-height:54px;border:1px solid var(--border);border-radius:14px;background:var(--panel);color:#fff;font-size:15px;font-weight:650}
+.app-picker{position:relative;z-index:20}
+.app-picker-btn{width:100%;display:flex;align-items:center;justify-content:space-between;padding:0 16px}
+.chev{color:var(--muted)}
+.app-menu{position:absolute;top:calc(100% + 8px);left:0;right:0;z-index:1000;border:1px solid var(--border);border-radius:14px;background:#141414;overflow-x:hidden;overflow-y:auto;max-height:min(420px,60vh);box-shadow:0 12px 30px rgba(0,0,0,.55);overscroll-behavior:contain}
+.app-row{width:100%;min-height:58px;border:0;border-bottom:1px solid #2b2b2b;border-radius:0;background:#141414;display:flex;align-items:center;gap:12px;padding:8px 12px;text-align:left}
+.app-row:last-child{border-bottom:0}
+.app-row:hover{background:#202020}
+.app-icon{width:38px;height:38px;border-radius:8px;object-fit:contain;background:#222;flex:0 0 38px}
+.app-icon-fallback{width:38px;height:38px;border-radius:8px;background:#262626;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:12px;flex:0 0 38px}
+.app-name{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.app-uses{font-size:11px;color:#777;margin-left:8px}
+button:active{transform:scale(.98);background:#303030}
+.power,.audio-output{transition:background .2s,border-color .2s,color .2s}
+.power.on{background:var(--red);border-color:#a63c3c}.power.off{background:var(--green);border-color:#2f9b59}.power.unknown{background:#333;border-color:#555;color:#bbb}
+.audio-output.receiver{background:var(--blue);border-color:#477fda}.audio-output.tv{background:var(--green);border-color:#2f9b59}.audio-output.both{background:var(--amber);border-color:#9b741f}.audio-output.unknown{background:#333;border-color:#555;color:#bbb}
+.input-active{background:var(--blue)!important;border-color:#477fda!important}
+.vol{min-height:84px;font-size:30px}.mute{min-height:84px}.small button{min-height:46px;font-size:13px}
+.nav{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:62px 62px 62px;gap:8px}
+.nav button{font-size:23px}.up{grid-column:2}.left{grid-column:1;grid-row:2}.enter{grid-column:2;grid-row:2;border-radius:50%}.right{grid-column:3;grid-row:2}.down{grid-column:2;grid-row:3}
+.panel{display:none}.panel.active{display:block}
+
+/* Subtle section shading while preserving the dark theme */
+#receiverPanel .grid.g2 button{background:#202323}
+#receiverPanel .label:nth-of-type(1) + .grid button{background:#1d2228}
+#receiverPanel .label:nth-of-type(2) + .grid button{background:#242120}
+#receiverPanel .label:nth-of-type(3) + .grid button{background:#222025}
+#receiverPanel .nav button,#receiverPanel .nav + .grid button{background:#1f2321}
+
+#tvPanel > .grid.g3 button{background:#202323}
+#tvPanel .app-picker-btn{background:#1d2228}
+#tvPanel .label:nth-of-type(2) + .nav button,#tvPanel .nav + .grid button{background:#1f2321}
+#tvPanel .label:nth-of-type(3) + .grid button{background:#242120}
+#tvPanel .label:nth-of-type(4) + .grid button{background:#202328}
+#tvPanel .label:nth-of-type(5) + .grid button,#tvPanel .label:nth-of-type(5) + .grid + .grid button{background:#222025}
+#tvPanel .label:nth-of-type(6) + .grid button{background:#1d2228}
+#blurayPanel > .grid.g2 button{background:#1d2228}
+#blurayPanel .nav button,#blurayPanel .nav + .grid button{background:#1f2321}
+#blurayPanel .label:nth-of-type(2) + .grid button{background:#222025}
+#blurayPanel .label:nth-of-type(3) + .grid button,#blurayPanel .label:nth-of-type(3) + .grid + .grid button,#blurayPanel .label:nth-of-type(3) + .grid + .grid + .grid button{background:#202328}
+#blurayPanel .label:nth-of-type(4) + .grid button{background:#242120}
+
+/* State colors always win */
+.power.on{background:var(--red)!important}
+.power.off{background:var(--green)!important}
+.power.unknown{background:#333!important}
+.audio-output.receiver{background:var(--blue)!important}
+.audio-output.tv{background:var(--green)!important}
+.audio-output.both{background:var(--amber)!important}
+.audio-output.unknown{background:#333!important}
+.input-active{background:var(--blue)!important}
+footer{text-align:center;color:#666;font-size:11px;margin-top:18px}
+.sony-footer-logo{display:block;color:#d8d8d8;font-family:Georgia,"Times New Roman",serif;font-size:26px;font-weight:700;letter-spacing:-1.5px;line-height:1;margin-bottom:5px;text-shadow:0 1px 0 #fff,0 2px 4px rgba(0,0,0,.7)}
+.home-sony{background:linear-gradient(180deg,#8294bd 0%,#697ca8 48%,#56698f 100%)!important;border-color:#91a2c9!important;color:#fff!important;text-shadow:0 1px 1px rgba(0,0,0,.65);box-shadow:inset 0 1px 0 rgba(255,255,255,.28),inset 0 -1px 0 rgba(0,0,0,.28),0 2px 6px rgba(0,0,0,.42)!important}
+.home-sony:hover{background:linear-gradient(180deg,#91a3ca 0%,#7488b5 48%,#6075a0 100%)!important;border-color:#a3b4d8!important}
+.home-sony:active{background:linear-gradient(180deg,#56698f 0%,#697ca8 52%,#8294bd 100%)!important}
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 20px);transform:translateX(-50%);background:#242424;border:1px solid #444;border-radius:999px;padding:9px 14px;opacity:0;pointer-events:none;transition:opacity .18s;font-size:13px}
+#toast.show{opacity:1}
+
+button svg{width:25px;height:25px;display:block;margin:auto;fill:currentColor;pointer-events:none}
+
+.trek-ok{display:flex;align-items:center;justify-content:center;width:100%;height:100%}
+.trek-ok svg{width:34px;height:34px;display:block;fill:none;margin:auto}
+#blurayPanel .nav .enter{
+  width:72px;
+  height:72px;
+  min-height:72px;
+  border-radius:50%;
+  font-size:0;
+  background:#26282c;
+  border:1px solid #444851;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.03),0 3px 10px rgba(0,0,0,.35);
+}
+#blurayPanel .nav .enter:active{transform:scale(.96)}
+
+
+.nav .enter{
+  width:68px !important;
+  height:68px !important;
+  min-height:68px !important;
+  border-radius:50% !important;
+  padding:0 !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  line-height:1 !important;
+  font-size:0 !important;
+  background:#24262a !important;
+  border:1px solid #41454d !important;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.025),0 2px 8px rgba(0,0,0,.35) !important;
+}
+.nav .enter .trek-ok{
+  width:42px;
+  height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transform:translateY(1px);
+}
+.nav .enter .trek-ok svg{
+  width:36px;
+  height:36px;
+  display:block;
+  margin:0;
+  overflow:visible;
+  fill:none;
+}
+.nav .enter:active{transform:scale(.96)}
+
+
+/* 2026 universal remote hover feedback */
+button:not(:disabled),
+.tab,
+[role="button"]{
+  transition:background-color .14s ease,border-color .14s ease,box-shadow .14s ease,transform .08s ease,color .14s ease;
+}
+@media (hover:hover){
+  button:not(:disabled):hover,
+  [role="button"]:hover{
+    background:#173b63 !important;
+    border-color:#3b91e8 !important;
+    box-shadow:0 0 0 1px rgba(59,145,232,.25),0 0 14px rgba(59,145,232,.22) !important;
+    color:#fff !important;
+  }
+  .tab:hover{
+    background:rgba(40,118,198,.18) !important;
+    color:#fff !important;
+  }
+  /* Preserve semantic power colors while still giving visible hover feedback */
+  button.power.on:hover{
+    border-color:#ff5a5f !important;
+    box-shadow:0 0 0 1px rgba(255,90,95,.28),0 0 14px rgba(255,90,95,.22) !important;
+  }
+  button.power.off:hover{
+    border-color:#43d66f !important;
+    box-shadow:0 0 0 1px rgba(67,214,111,.28),0 0 14px rgba(67,214,111,.22) !important;
+  }
+  .nav .enter:hover{
+    background:#173b63 !important;
+    border-color:#3b91e8 !important;
+    box-shadow:0 0 0 1px rgba(59,145,232,.3),0 0 18px rgba(59,145,232,.28) !important;
+  }
+}
+button:not(:disabled):active,
+[role="button"]:active{
+  transform:scale(.97);
+}
+
+
+/* 2026 reference-matched circular D-pad */
+.nav{
+  --pad:238px;
+  position:relative !important;
+  display:block !important;
+  width:var(--pad) !important;
+  height:var(--pad) !important;
+  margin:18px auto 22px !important;
+  border-radius:50% !important;
+  background:
+    radial-gradient(circle at 50% 50%, transparent 0 31%, #080b0f 31.5% 33%, transparent 33.5%),
+    radial-gradient(circle at 50% 50%, #12171d 0 69%, #06080b 69.5% 72%, #171d25 72.5% 74%, #05070a 74.5% 100%) !important;
+  border:1px solid #303844 !important;
+  box-shadow:
+    0 0 0 2px #05070a,
+    0 0 0 3px #222a34,
+    0 8px 18px rgba(0,0,0,.55),
+    inset 0 0 18px rgba(255,255,255,.025) !important;
+  overflow:hidden;
+}
+
+/* Shared wedge appearance */
+.nav button{
+  position:absolute !important;
+  margin:0 !important;
+  padding:0 !important;
+  border:1px solid #3b444f !important;
+  border-radius:18px !important;
+  background:linear-gradient(180deg,#222831 0%,#171c22 52%,#101419 100%) !important;
+  color:#d8e8ff !important;
+  text-shadow:0 0 8px rgba(91,163,255,.9) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.06),
+    inset 0 -2px 4px rgba(0,0,0,.45),
+    0 2px 5px rgba(0,0,0,.55) !important;
+  font-size:31px !important;
+  line-height:1 !important;
+  z-index:2;
+}
+
+/* Trapezoid-ish top and bottom segments */
+.nav .up{
+  top:8px !important;
+  left:64px !important;
+  width:110px !important;
+  height:76px !important;
+  min-height:76px !important;
+  clip-path:polygon(17% 0,83% 0,100% 70%,78% 100%,22% 100%,0 70%);
+}
+.nav .down{
+  bottom:8px !important;
+  left:64px !important;
+  width:110px !important;
+  height:76px !important;
+  min-height:76px !important;
+  clip-path:polygon(22% 0,78% 0,100% 30%,83% 100%,17% 100%,0 30%);
+}
+
+/* Side segments */
+.nav .left{
+  left:8px !important;
+  top:64px !important;
+  width:76px !important;
+  height:110px !important;
+  min-height:110px !important;
+  clip-path:polygon(0 17%,70% 0,100% 22%,100% 78%,70% 100%,0 83%);
+}
+.nav .right{
+  right:8px !important;
+  top:64px !important;
+  width:76px !important;
+  height:110px !important;
+  min-height:110px !important;
+  clip-path:polygon(30% 0,100% 17%,100% 83%,30% 100%,0 78%,0 22%);
+}
+
+/* Reference-style glowing center */
+.nav .enter{
+  left:77px !important;
+  top:77px !important;
+  width:84px !important;
+  height:84px !important;
+  min-height:84px !important;
+  border-radius:50% !important;
+  clip-path:none !important;
+  z-index:5 !important;
+  background:radial-gradient(circle at 50% 40%,#222933 0%,#151b22 62%,#0d1116 100%) !important;
+  border:1px solid #5aa7ff !important;
+  text-shadow:none !important;
+  box-shadow:
+    0 0 0 2px #080b0f,
+    0 0 0 3px rgba(81,159,255,.55),
+    0 0 12px rgba(65,151,255,.5),
+    inset 0 0 11px rgba(77,158,255,.14) !important;
+}
+.nav .enter .trek-ok{
+  display:flex !important;
+  width:52px !important;
+  height:52px !important;
+  align-items:center !important;
+  justify-content:center !important;
+  margin:auto !important;
+  transform:none !important;
+}
+.nav .enter .trek-ok svg{
+  width:42px !important;
+  height:42px !important;
+  display:block !important;
+  overflow:visible !important;
+  filter:drop-shadow(0 1px 1px #000);
+}
+
+/* Crisp blue glyphs matching the reference */
+.nav .up,
+.nav .down,
+.nav .left,
+.nav .right{
+  color:#e3efff !important;
+  -webkit-text-stroke:.3px #91bdff;
+}
+
+@media (hover:hover){
+  .nav button:not(.enter):hover{
+    background:linear-gradient(180deg,#273443 0%,#1a2633 52%,#111b26 100%) !important;
+    border-color:#599eea !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.07),
+      0 0 11px rgba(58,141,240,.32) !important;
+  }
+  .nav .enter:hover{
+    border-color:#83c0ff !important;
+    box-shadow:
+      0 0 0 2px #080b0f,
+      0 0 0 3px rgba(102,177,255,.7),
+      0 0 19px rgba(69,158,255,.62),
+      inset 0 0 12px rgba(92,171,255,.2) !important;
+  }
+}
+
+
+/* D-pad v3: four clean annular pie slices */
+.nav{
+  --d:238px;
+  --c:86px;
+  position:relative !important;
+  display:block !important;
+  width:var(--d) !important;
+  height:var(--d) !important;
+  margin:18px auto 22px !important;
+  border-radius:50% !important;
+  overflow:visible !important;
+  background:#080b0f !important;
+  border:1px solid #303844 !important;
+  box-shadow:0 0 0 2px #05070a,0 0 0 3px #222a34,0 8px 18px rgba(0,0,0,.55) !important;
+}
+
+/* Every direction occupies the full circle; clip-path cuts it into a 90deg sector.
+   A radial mask removes the center, producing a true annular pie slice. */
+.nav .up,.nav .right,.nav .down,.nav .left{
+  position:absolute !important;
+  inset:4px !important;
+  width:auto !important;
+  height:auto !important;
+  min-height:0 !important;
+  padding:0 !important;
+  margin:0 !important;
+  border:0 !important;
+  border-radius:50% !important;
+  background:radial-gradient(circle at 50% 42%,#242b34 0%,#171d24 58%,#101419 100%) !important;
+  color:#e4efff !important;
+  font-size:32px !important;
+  line-height:1 !important;
+  text-shadow:0 0 8px rgba(88,160,255,.95) !important;
+  box-shadow:inset 0 0 0 1px #39424d !important;
+  -webkit-mask:radial-gradient(circle at center,transparent 0 48px,#000 49px);
+  mask:radial-gradient(circle at center,transparent 0 48px,#000 49px);
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  z-index:2 !important;
+}
+
+.nav .up{
+  clip-path:polygon(14.65% 14.65%,50% 0,85.35% 14.65%,64.5% 35.5%,50% 31%,35.5% 35.5%);
+  padding-bottom:116px !important;
+}
+.nav .right{
+  clip-path:polygon(85.35% 14.65%,100% 50%,85.35% 85.35%,64.5% 64.5%,69% 50%,64.5% 35.5%);
+  padding-left:116px !important;
+}
+.nav .down{
+  clip-path:polygon(85.35% 85.35%,50% 100%,14.65% 85.35%,35.5% 64.5%,50% 69%,64.5% 64.5%);
+  padding-top:116px !important;
+}
+.nav .left{
+  clip-path:polygon(14.65% 85.35%,0 50%,14.65% 14.65%,35.5% 35.5%,31% 50%,35.5% 64.5%);
+  padding-right:116px !important;
+}
+
+/* small dark separators like the reference */
+.nav::after{
+  content:"";
+  position:absolute;
+  inset:3px;
+  border-radius:50%;
+  pointer-events:none;
+  z-index:3;
+  background:
+    conic-gradient(from 44deg,
+      transparent 0 1.2deg,#07090c 1.2deg 2.8deg,
+      transparent 2.8deg 91.2deg,#07090c 91.2deg 92.8deg,
+      transparent 92.8deg 181.2deg,#07090c 181.2deg 182.8deg,
+      transparent 182.8deg 271.2deg,#07090c 271.2deg 272.8deg,
+      transparent 272.8deg 360deg);
+  -webkit-mask:radial-gradient(circle,transparent 0 49px,#000 50px 100%);
+  mask:radial-gradient(circle,transparent 0 49px,#000 50px 100%);
+}
+
+/* center sits above all four slices */
+.nav .enter{
+  position:absolute !important;
+  left:76px !important;
+  top:76px !important;
+  width:86px !important;
+  height:86px !important;
+  min-height:86px !important;
+  padding:0 !important;
+  border-radius:50% !important;
+  clip-path:none !important;
+  z-index:6 !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  background:radial-gradient(circle at 50% 38%,#242b34 0%,#171c23 60%,#0d1116 100%) !important;
+  border:1px solid #5ba9ff !important;
+  box-shadow:0 0 0 2px #080b0f,0 0 0 3px rgba(81,159,255,.55),0 0 13px rgba(65,151,255,.5),inset 0 0 11px rgba(77,158,255,.14) !important;
+}
+
+@media (hover:hover){
+  .nav .up:hover,.nav .right:hover,.nav .down:hover,.nav .left:hover{
+    background:radial-gradient(circle at 50% 42%,#2b3b4d 0%,#1c2a38 58%,#111b26 100%) !important;
+    color:#fff !important;
+    filter:drop-shadow(0 0 7px rgba(72,157,255,.45));
+  }
+}
+
+
+/* D-pad v4: true four-slice ring that reaches the outer circle */
+.nav{
+  --pad:238px;
+  position:relative !important;
+  display:block !important;
+  width:var(--pad) !important;
+  height:var(--pad) !important;
+  margin:18px auto 22px !important;
+  border-radius:50% !important;
+  overflow:hidden !important;
+  background:#07090c !important;
+  border:1px solid #303844 !important;
+  box-shadow:
+    0 0 0 2px #05070a,
+    0 0 0 3px #222a34,
+    0 8px 18px rgba(0,0,0,.55) !important;
+}
+
+/* Each direction is a full circular layer, clipped to one 90° sector.
+   The radial mask cuts out the center so the four buttons form a ring. */
+.nav .up,
+.nav .right,
+.nav .down,
+.nav .left{
+  position:absolute !important;
+  inset:4px !important;
+  width:auto !important;
+  height:auto !important;
+  min-height:0 !important;
+  margin:0 !important;
+  padding:0 !important;
+  border-radius:50% !important;
+  border:1px solid #3b444f !important;
+  background:linear-gradient(180deg,#232a33 0%,#171d24 55%,#101419 100%) !important;
+  color:#e5efff !important;
+  font-size:32px !important;
+  line-height:1 !important;
+  text-shadow:0 0 8px rgba(88,160,255,.95) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05) !important;
+  z-index:2 !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  -webkit-mask:radial-gradient(circle at center,transparent 0 48px,#000 49px);
+  mask:radial-gradient(circle at center,transparent 0 48px,#000 49px);
+}
+
+/* Four Simon-style pie slices. Because the source element is circular,
+   the outside edge naturally follows the outer circle. */
+.nav .up{
+  clip-path:polygon(0 0,100% 0,50% 50%);
+}
+.nav .right{
+  clip-path:polygon(100% 0,100% 100%,50% 50%);
+}
+.nav .down{
+  clip-path:polygon(100% 100%,0 100%,50% 50%);
+}
+.nav .left{
+  clip-path:polygon(0 100%,0 0,50% 50%);
+}
+
+/* Move arrow glyphs into the visual center of each slice */
+.nav .up{padding-bottom:118px !important}
+.nav .right{padding-left:118px !important}
+.nav .down{padding-top:118px !important}
+.nav .left{padding-right:118px !important}
+
+/* Thin separators between the four slices */
+.nav::after{
+  content:"";
+  position:absolute;
+  inset:4px;
+  border-radius:50%;
+  z-index:4;
+  pointer-events:none;
+  background:
+    linear-gradient(45deg,transparent calc(50% - 1px),#07090c calc(50% - 1px),#07090c calc(50% + 1px),transparent calc(50% + 1px)),
+    linear-gradient(-45deg,transparent calc(50% - 1px),#07090c calc(50% - 1px),#07090c calc(50% + 1px),transparent calc(50% + 1px));
+  -webkit-mask:radial-gradient(circle at center,transparent 0 49px,#000 50px);
+  mask:radial-gradient(circle at center,transparent 0 49px,#000 50px);
+}
+
+/* Center button stays above the slices */
+.nav .enter{
+  position:absolute !important;
+  left:76px !important;
+  top:76px !important;
+  width:86px !important;
+  height:86px !important;
+  min-height:86px !important;
+  padding:0 !important;
+  border-radius:50% !important;
+  clip-path:none !important;
+  z-index:6 !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  background:radial-gradient(circle at 50% 38%,#242b34 0%,#171c23 60%,#0d1116 100%) !important;
+  border:1px solid #5ba9ff !important;
+  box-shadow:
+    0 0 0 2px #080b0f,
+    0 0 0 3px rgba(81,159,255,.55),
+    0 0 13px rgba(65,151,255,.5),
+    inset 0 0 11px rgba(77,158,255,.14) !important;
+}
+
+@media (hover:hover){
+  .nav .up:hover,
+  .nav .right:hover,
+  .nav .down:hover,
+  .nav .left:hover{
+    background:linear-gradient(180deg,#2a394a 0%,#1b2937 55%,#111b26 100%) !important;
+    color:#fff !important;
+    filter:drop-shadow(0 0 8px rgba(72,157,255,.45));
+  }
+}
+
+
+/* Center directional chevrons within each Simon quadrant */
+.nav .up,
+.nav .right,
+.nav .down,
+.nav .left{
+  padding:0 !important;
+  font-family:Arial,Helvetica,sans-serif !important;
+  font-weight:300 !important;
+  text-shadow:0 0 8px rgba(88,160,255,.95) !important;
+}
+.nav .up{
+  justify-content:center !important;
+  align-items:flex-start !important;
+  padding-top:29px !important;
+}
+.nav .down{
+  justify-content:center !important;
+  align-items:flex-end !important;
+  padding-bottom:29px !important;
+}
+.nav .left{
+  justify-content:flex-start !important;
+  align-items:center !important;
+  padding-left:31px !important;
+}
+.nav .right{
+  justify-content:flex-end !important;
+  align-items:center !important;
+  padding-right:31px !important;
+}
+.nav .left,.nav .right{
+  font-size:44px !important;
+}
+.nav .up,.nav .down{
+  font-size:40px !important;
+}
+
+
+/* Use the exact same chevron shape in all four directions */
+.nav .up,
+.nav .down{
+  font-size:44px !important;
+}
+.nav .up{
+  transform:none !important;
+}
+.nav .down{
+  transform:none !important;
+}
+
+/* Render vertical directions from the same › chevron used horizontally */
+.nav .up{font-size:0 !important}
+.nav .up::before{
+  content:"›";
+  display:block;
+  font-size:44px;
+  font-family:Arial,Helvetica,sans-serif;
+  font-weight:300;
+  transform:rotate(-90deg);
+  line-height:1;
+}
+.nav .down{font-size:0 !important}
+.nav .down::before{
+  content:"›";
+  display:block;
+  font-size:44px;
+  font-family:Arial,Helvetica,sans-serif;
+  font-weight:300;
+  transform:rotate(90deg);
+  line-height:1;
+}
+
+
+/* Correct vertical chevron orientation */
+.nav .up::before{
+  transform:rotate(90deg) !important;
+}
+.nav .down::before{
+  transform:rotate(-90deg) !important;
+}
+
+
+/* v9: same exact chevron glyph for all directions */
+.nav .up::before{
+  content:"›" !important;
+  transform:rotate(-90deg) !important;
+  font-size:44px !important;
+  font-family:Arial,Helvetica,sans-serif !important;
+  font-weight:300 !important;
+  line-height:1 !important;
+}
+.nav .down::before{
+  content:"›" !important;
+  transform:rotate(90deg) !important;
+  font-size:44px !important;
+  font-family:Arial,Helvetica,sans-serif !important;
+  font-weight:300 !important;
+  line-height:1 !important;
+}
+
+
+/* v10: normalize all four chevron orientations */
+.nav .up,
+.nav .down,
+.nav .left,
+.nav .right{
+  font-size:0 !important;
+}
+
+.nav .up::before,
+.nav .right::before,
+.nav .down::before,
+.nav .left::before{
+  content:"›" !important;
+  display:block !important;
+  font-size:44px !important;
+  font-family:Arial,Helvetica,sans-serif !important;
+  font-weight:300 !important;
+  line-height:1 !important;
+  transform-origin:center center !important;
+}
+
+/* point away from center */
+.nav .right::before{ transform:rotate(0deg) !important; }
+.nav .down::before{ transform:rotate(90deg) !important; }
+.nav .left::before{ transform:rotate(180deg) !important; }
+.nav .up::before{ transform:rotate(270deg) !important; }
+
+
+/* v11: geometrically identical, optically centered chevrons */
+.nav .up::before,
+.nav .right::before,
+.nav .down::before,
+.nav .left::before{
+  content:"" !important;
+  display:block !important;
+  width:17px !important;
+  height:17px !important;
+  font-size:0 !important;
+  border-top:4px solid #e5efff !important;
+  border-right:4px solid #e5efff !important;
+  border-radius:1px !important;
+  box-sizing:border-box !important;
+  filter:drop-shadow(0 0 5px rgba(88,160,255,.95)) !important;
+  transform-origin:50% 50% !important;
+  flex:0 0 auto !important;
+}
+
+/* identical chevron, only rotation changes */
+.nav .right::before{ transform:rotate(45deg) !important; }
+.nav .down::before{ transform:rotate(135deg) !important; }
+.nav .left::before{ transform:rotate(225deg) !important; }
+.nav .up::before{ transform:rotate(315deg) !important; }
+
+/* Optical centering inside each sector */
+.nav .up{
+  align-items:flex-start !important;
+  justify-content:center !important;
+  padding:31px 0 0 0 !important;
+}
+.nav .right{
+  align-items:center !important;
+  justify-content:flex-end !important;
+  padding:0 31px 0 0 !important;
+}
+.nav .down{
+  align-items:flex-end !important;
+  justify-content:center !important;
+  padding:0 0 31px 0 !important;
+}
+.nav .left{
+  align-items:center !important;
+  justify-content:flex-start !important;
+  padding:0 0 0 31px !important;
+}
+
+
+/* v12: top device tabs styled like the reference */
+.tabs{
+  display:grid !important;
+  grid-template-columns:repeat(3,1fr) !important;
+  gap:0 !important;
+  margin:0 !important;
+  border-top:1px solid #262d35 !important;
+  border-bottom:1px solid #1c2229 !important;
+  background:#0a0d11 !important;
+  overflow:hidden !important;
+}
+
+.tab{
+  position:relative !important;
+  min-height:62px !important;
+  border:0 !important;
+  border-right:1px solid #1f252d !important;
+  border-radius:0 !important;
+  background:linear-gradient(180deg,#101419 0%,#0b0e12 100%) !important;
+  color:#aeb6c0 !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:11px !important;
+  padding:0 14px !important;
+  font-size:15px !important;
+  font-weight:500 !important;
+  letter-spacing:.2px !important;
+  box-shadow:none !important;
+  text-transform:uppercase !important;
+}
+
+.tab:last-child{
+  border-right:0 !important;
+}
+
+.tab::after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height:3px;
+  background:transparent;
+  box-shadow:none;
+}
+
+.tab.active{
+  color:#f4f7fb !important;
+  background:
+    radial-gradient(circle at 50% 100%,rgba(27,128,225,.16),transparent 48%),
+    linear-gradient(180deg,#111820 0%,#0c1117 100%) !important;
+}
+
+.tab.active::after{
+  background:#00aaff !important;
+  box-shadow:0 0 10px rgba(0,170,255,.9),0 -2px 10px rgba(0,170,255,.35) !important;
+}
+
+.tab:hover{
+  background:linear-gradient(180deg,#141b22 0%,#0f141a 100%) !important;
+  color:#fff !important;
+}
+
+/* icon containers */
+.tab .tab-icon{
+  width:26px;
+  height:26px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 26px;
+  color:#c9d0d8;
+  opacity:.95;
+}
+
+.tab .tab-icon svg{
+  width:24px;
+  height:24px;
+  display:block;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+.tab.active .tab-icon{
+  color:#eef7ff;
+  filter:drop-shadow(0 0 6px rgba(89,174,255,.75));
+}
+
+
+/* v13: tab icon/label spacing + blue underline hover */
+.tab{
+  gap:18px !important;
+}
+
+.tab .tab-icon{
+  margin-right:2px !important;
+}
+
+@media (hover:hover){
+  .tab:not(.active):hover::after{
+    background:#00aaff !important;
+    box-shadow:
+      0 0 10px rgba(0,170,255,.9),
+      0 -2px 10px rgba(0,170,255,.35) !important;
+  }
+
+  .tab:not(.active):hover .tab-icon{
+    color:#eef7ff !important;
+    filter:drop-shadow(0 0 6px rgba(89,174,255,.65));
+  }
+}
+
+
+/* v14: Sony green selected tab, blue hover for inactive tabs */
+.tab.active::after{
+  background:#8fcf3c !important;
+  box-shadow:
+    0 0 10px rgba(143,207,60,.90),
+    0 -2px 10px rgba(143,207,60,.35) !important;
+}
+
+.tab.active{
+  background:
+    radial-gradient(circle at 50% 100%,rgba(143,207,60,.13),transparent 48%),
+    linear-gradient(180deg,#111820 0%,#0c1117 100%) !important;
+}
+
+.tab.active .tab-icon{
+  color:#f3ffe5 !important;
+  filter:drop-shadow(0 0 6px rgba(143,207,60,.60)) !important;
+}
+
+/* Inactive tabs remain Sony-style blue on hover */
+@media (hover:hover){
+  .tab:not(.active):hover::after{
+    background:#00aaff !important;
+    box-shadow:
+      0 0 10px rgba(0,170,255,.9),
+      0 -2px 10px rgba(0,170,255,.35) !important;
+  }
+}
+
+
+/* v15: center device name independently of icon width */
+.tab{
+  position:relative !important;
+  display:grid !important;
+  grid-template-columns:34px 1fr 34px !important;
+  align-items:center !important;
+  gap:0 !important;
+  padding:0 14px !important;
+}
+
+.tab .tab-icon{
+  grid-column:1 !important;
+  justify-self:center !important;
+  margin:0 !important;
+}
+
+.tab .tab-label{
+  grid-column:2 !important;
+  justify-self:center !important;
+  text-align:center !important;
+  width:100% !important;
+}
+
+.tab::before{
+  content:"";
+  grid-column:3;
+  width:34px;
+  height:1px;
+}
+
+
+/* v16: center icon + device name as one tight visual group */
+.tab{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:6px !important;
+  padding:0 14px !important;
+}
+
+.tab .tab-icon{
+  width:26px !important;
+  height:26px !important;
+  flex:0 0 26px !important;
+  margin:0 !important;
+}
+
+.tab .tab-label{
+  width:auto !important;
+  text-align:left !important;
+  justify-self:auto !important;
+}
+
+.tab::before{
+  display:none !important;
+  content:none !important;
+}
+
+
+/* v17: reference-style POWER button, preserving existing dimensions */
+button.power{
+  position:relative !important;
+  background:linear-gradient(180deg,#111418 0%,#090b0e 100%) !important;
+  border:1px solid #442126 !important;
+  border-radius:12px !important;
+  color:#ff2b32 !important;
+  box-shadow:
+    0 0 0 7px #11161b,
+    0 0 0 8px #29313a,
+    inset 0 1px 0 rgba(255,255,255,.025),
+    inset 0 0 18px rgba(255,30,40,.025) !important;
+  font-weight:600 !important;
+  letter-spacing:.2px !important;
+  text-shadow:0 0 8px rgba(255,32,40,.25) !important;
+}
+
+button.power::before{
+  content:"⏻";
+  display:inline-block;
+  margin-right:12px;
+  font-size:30px;
+  line-height:1;
+  font-weight:400;
+  vertical-align:-3px;
+  color:#ff2028;
+  text-shadow:0 0 8px rgba(255,32,40,.35);
+}
+
+@media (hover:hover){
+  button.power:hover{
+    background:linear-gradient(180deg,#181217 0%,#0d090c 100%) !important;
+    border-color:#9d252d !important;
+    color:#ff3b42 !important;
+    box-shadow:
+      0 0 0 7px #11161b,
+      0 0 0 8px #29313a,
+      0 0 14px rgba(255,38,48,.20),
+      inset 0 0 18px rgba(255,30,40,.04) !important;
+  }
+}
+
+
+/* v18: richer glossy gradient for POWER button */
+button.power{
+  background:
+    linear-gradient(180deg,
+      #1a1d21 0%,
+      #121519 18%,
+      #0d1014 48%,
+      #090b0e 72%,
+      #050608 100%) !important;
+  border:1px solid #5a2026 !important;
+  box-shadow:
+    0 0 0 7px #11161b,
+    0 0 0 8px #29313a,
+    inset 0 1px 0 rgba(255,255,255,.06),
+    inset 0 -10px 18px rgba(0,0,0,.38),
+    inset 0 8px 18px rgba(255,255,255,.015) !important;
+}
+
+button.power::after{
+  content:"";
+  position:absolute;
+  left:8%;
+  right:8%;
+  top:8%;
+  height:34%;
+  border-radius:10px 10px 18px 18px;
+  background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,0));
+  pointer-events:none;
+}
+
+@media (hover:hover){
+  button.power:hover{
+    background:
+      linear-gradient(180deg,
+        #21181b 0%,
+        #171014 20%,
+        #100b0e 50%,
+        #0b080a 74%,
+        #060506 100%) !important;
+    border-color:#a52d35 !important;
+    box-shadow:
+      0 0 0 7px #11161b,
+      0 0 0 8px #29313a,
+      0 0 16px rgba(255,42,52,.24),
+      inset 0 1px 0 rgba(255,255,255,.06),
+      inset 0 -10px 18px rgba(0,0,0,.4) !important;
+  }
+}
+
+
+/* v19: receiver power handler verified native command */
+
+/* v20: glossy state-aware power button + corrected top-tab vertical spacing */
+
+/* Keep icon and device name together, but give the group breathing room vertically */
+.tabs{
+  padding-top:7px !important;
+  padding-bottom:7px !important;
+}
+
+.tab{
+  min-height:62px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:6px !important;
+  padding:7px 14px 9px !important;
+}
+
+.tab .tab-icon{
+  margin:0 !important;
+}
+
+.tab .tab-label{
+  margin:0 !important;
+  line-height:1.15 !important;
+}
+
+/* POWER button keeps its existing dimensions */
+button.power{
+  position:relative !important;
+  overflow:hidden !important;
+  border-radius:12px !important;
+  font-weight:600 !important;
+  letter-spacing:.2px !important;
+}
+
+/* Device ON = button action is POWER OFF = RED */
+button.power.on{
+  color:#fff4f4 !important;
+  border:1px solid #ff2028 !important;
+  background:
+    linear-gradient(180deg,
+      #a90b12 0%,
+      #85070d 18%,
+      #5f0308 52%,
+      #350104 78%,
+      #170002 100%) !important;
+  box-shadow:
+    0 0 0 6px #10151a,
+    0 0 0 7px #283039,
+    0 0 12px rgba(255,24,34,.20),
+    inset 0 1px 0 rgba(255,255,255,.22),
+    inset 0 -12px 18px rgba(0,0,0,.32) !important;
+  text-shadow:0 1px 2px #000,0 0 7px rgba(255,255,255,.18) !important;
+}
+
+/* Device OFF = button action is POWER ON = GREEN */
+button.power.off{
+  color:#f3fff3 !important;
+  border:1px solid #28c842 !important;
+  background:
+    linear-gradient(180deg,
+      #197c2a 0%,
+      #116322 18%,
+      #0a4718 52%,
+      #052b0e 78%,
+      #021406 100%) !important;
+  box-shadow:
+    0 0 0 6px #10151a,
+    0 0 0 7px #283039,
+    0 0 12px rgba(35,210,67,.18),
+    inset 0 1px 0 rgba(255,255,255,.20),
+    inset 0 -12px 18px rgba(0,0,0,.30) !important;
+  text-shadow:0 1px 2px #000,0 0 7px rgba(255,255,255,.15) !important;
+}
+
+button.power.on::before,
+button.power.off::before{
+  color:currentColor !important;
+  text-shadow:0 0 7px currentColor !important;
+}
+
+/* glossy upper face like the reference buttons */
+button.power.on::after,
+button.power.off::after{
+  content:"" !important;
+  position:absolute !important;
+  left:4% !important;
+  right:4% !important;
+  top:4% !important;
+  height:42% !important;
+  border-radius:10px 10px 45% 45% !important;
+  background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.025) 55%,transparent 100%) !important;
+  pointer-events:none !important;
+}
+
+/* Unknown state stays neutral */
+button.power.unknown{
+  color:#d6dce3 !important;
+  border-color:#46505a !important;
+  background:linear-gradient(180deg,#242a31 0%,#151a20 48%,#090c10 100%) !important;
+}
+
+@media (hover:hover){
+  button.power.on:hover{
+    filter:brightness(1.18) !important;
+    box-shadow:
+      0 0 0 6px #10151a,
+      0 0 0 7px #283039,
+      0 0 18px rgba(255,30,40,.38),
+      inset 0 1px 0 rgba(255,255,255,.24),
+      inset 0 -12px 18px rgba(0,0,0,.30) !important;
+  }
+
+  button.power.off:hover{
+    filter:brightness(1.18) !important;
+    box-shadow:
+      0 0 0 6px #10151a,
+      0 0 0 7px #283039,
+      0 0 18px rgba(40,210,70,.34),
+      inset 0 1px 0 rgba(255,255,255,.22),
+      inset 0 -12px 18px rgba(0,0,0,.28) !important;
+  }
+}
+
+/* v20 */
+
+/* v21: clean glossy power buttons matching the RED/GREEN reference */
+
+/* Remove the old power glyph completely */
+button.power::before{
+  content:none !important;
+  display:none !important;
+}
+
+/* Keep the button the same size and center the text */
+button.power{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  padding:0 18px !important;
+  font-size:17px !important;
+  font-weight:600 !important;
+  letter-spacing:.2px !important;
+  text-align:center !important;
+  border-radius:10px !important;
+  overflow:hidden !important;
+}
+
+/* ON = red POWER OFF */
+button.power.on{
+  color:#f5f5f5 !important;
+  border:1px solid #ff2028 !important;
+  background:
+    linear-gradient(180deg,
+      #8f1017 0%,
+      #72090f 24%,
+      #53060b 54%,
+      #300307 78%,
+      #170103 100%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.16),
+    inset 0 -9px 15px rgba(0,0,0,.34),
+    0 0 0 1px rgba(255,35,43,.08),
+    0 5px 12px rgba(0,0,0,.32) !important;
+  text-shadow:0 1px 2px rgba(0,0,0,.8) !important;
+}
+
+/* OFF = green POWER ON */
+button.power.off{
+  color:#f5f5f5 !important;
+  border:1px solid #31c84a !important;
+  background:
+    linear-gradient(180deg,
+      #17752a 0%,
+      #115f22 24%,
+      #0b4518 54%,
+      #062b0f 78%,
+      #021507 100%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.15),
+    inset 0 -9px 15px rgba(0,0,0,.32),
+    0 0 0 1px rgba(49,200,74,.08),
+    0 5px 12px rgba(0,0,0,.32) !important;
+  text-shadow:0 1px 2px rgba(0,0,0,.8) !important;
+}
+
+/* Simple soft top sheen, like the reference button */
+button.power.on::after,
+button.power.off::after{
+  content:"" !important;
+  position:absolute !important;
+  left:2% !important;
+  right:2% !important;
+  top:2% !important;
+  height:38% !important;
+  border-radius:8px 8px 45% 45% !important;
+  background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.02) 60%,transparent 100%) !important;
+  pointer-events:none !important;
+}
+
+/* Neutral unknown state, no icon */
+button.power.unknown{
+  color:#d8dde3 !important;
+  border:1px solid #454d56 !important;
+  background:linear-gradient(180deg,#242a31 0%,#151a20 55%,#0a0d10 100%) !important;
+}
+
+@media (hover:hover){
+  button.power.on:hover{
+    filter:brightness(1.12) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.18),
+      inset 0 -9px 15px rgba(0,0,0,.30),
+      0 0 13px rgba(255,32,40,.24),
+      0 5px 12px rgba(0,0,0,.32) !important;
+  }
+  button.power.off:hover{
+    filter:brightness(1.12) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.17),
+      inset 0 -9px 15px rgba(0,0,0,.29),
+      0 0 13px rgba(49,200,74,.22),
+      0 5px 12px rgba(0,0,0,.32) !important;
+  }
+}
+
+/* v21 */
+
+/* v22: force identical power treatment on Receiver, TV, and Blu-ray */
+#powerBtn.power,
+#tvPowerBtn.power,
+#bdpPowerBtn.power{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  padding:0 18px !important;
+  font-size:17px !important;
+  font-weight:600 !important;
+  letter-spacing:.2px !important;
+  text-align:center !important;
+  border-radius:10px !important;
+  overflow:hidden !important;
+  position:relative !important;
+}
+
+#powerBtn.power::before,
+#tvPowerBtn.power::before,
+#bdpPowerBtn.power::before{
+  content:none !important;
+  display:none !important;
+}
+
+/* ON = red POWER OFF */
+#powerBtn.power.on,
+#tvPowerBtn.power.on,
+#bdpPowerBtn.power.on{
+  color:#f5f5f5 !important;
+  border:1px solid #ff2028 !important;
+  background:linear-gradient(
+    180deg,
+    #8f1017 0%,
+    #72090f 24%,
+    #53060b 54%,
+    #300307 78%,
+    #170103 100%
+  ) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.16),
+    inset 0 -9px 15px rgba(0,0,0,.34),
+    0 0 0 1px rgba(255,35,43,.08),
+    0 5px 12px rgba(0,0,0,.32) !important;
+  text-shadow:0 1px 2px rgba(0,0,0,.8) !important;
+}
+
+/* OFF = green POWER ON */
+#powerBtn.power.off,
+#tvPowerBtn.power.off,
+#bdpPowerBtn.power.off{
+  color:#f5f5f5 !important;
+  border:1px solid #31c84a !important;
+  background:linear-gradient(
+    180deg,
+    #17752a 0%,
+    #115f22 24%,
+    #0b4518 54%,
+    #062b0f 78%,
+    #021507 100%
+  ) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.15),
+    inset 0 -9px 15px rgba(0,0,0,.32),
+    0 0 0 1px rgba(49,200,74,.08),
+    0 5px 12px rgba(0,0,0,.32) !important;
+  text-shadow:0 1px 2px rgba(0,0,0,.8) !important;
+}
+
+#powerBtn.power.on::after,
+#tvPowerBtn.power.on::after,
+#bdpPowerBtn.power.on::after,
+#powerBtn.power.off::after,
+#tvPowerBtn.power.off::after,
+#bdpPowerBtn.power.off::after{
+  content:"" !important;
+  position:absolute !important;
+  left:2% !important;
+  right:2% !important;
+  top:2% !important;
+  height:38% !important;
+  border-radius:8px 8px 45% 45% !important;
+  background:linear-gradient(
+    180deg,
+    rgba(255,255,255,.10),
+    rgba(255,255,255,.02) 60%,
+    transparent 100%
+  ) !important;
+  pointer-events:none !important;
+}
+
+/* Give the device selector a little more air above the icon/name group */
+.tabs{
+  padding-top:11px !important;
+  padding-bottom:7px !important;
+}
+
+.tab{
+  padding-top:9px !important;
+  padding-bottom:9px !important;
+}
+
+/* v22 */
+
+/* v25: glossy treatment for regular buttons only.
+   IMPORTANT: .nav buttons are completely excluded so the perfected D-pad is untouched. */
+
+button:not(.power):not(.tab):not(.nav button){
+  position:relative !important;
+  overflow:hidden !important;
+  color:#f0f3f6 !important;
+  border:1px solid #3f4853 !important;
+  background:
+    linear-gradient(
+      180deg,
+      #2b3139 0%,
+      #222831 18%,
+      #171c22 52%,
+      #101419 78%,
+      #0a0d11 100%
+    ) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.10),
+    inset 0 -8px 14px rgba(0,0,0,.34),
+    0 3px 8px rgba(0,0,0,.28) !important;
+  text-shadow:0 1px 2px rgba(0,0,0,.75) !important;
+}
+
+/* Soft glossy highlight on regular buttons only */
+button:not(.power):not(.tab):not(.nav button)::after{
+  content:"";
+  position:absolute;
+  left:2%;
+  right:2%;
+  top:2%;
+  height:38%;
+  border-radius:inherit;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.10),
+      rgba(255,255,255,.025) 60%,
+      transparent 100%
+    );
+  pointer-events:none;
+  z-index:0;
+}
+
+button:not(.power):not(.tab):not(.nav button) > *{
+  position:relative;
+  z-index:1;
+}
+
+@media (hover:hover){
+  button:not(.power):not(.tab):not(.nav button):hover{
+    border-color:#4f9be8 !important;
+    background:
+      linear-gradient(
+        180deg,
+        #344252 0%,
+        #273544 20%,
+        #1b2937 55%,
+        #111b26 100%
+      ) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.12),
+      inset 0 -8px 14px rgba(0,0,0,.30),
+      0 0 13px rgba(65,150,245,.26),
+      0 3px 8px rgba(0,0,0,.28) !important;
+  }
+}
+
+/* v25 */
+
+/* v26: live device state. D-pad intentionally untouched. */
+.disc-status{
+  width:max-content;
+  max-width:100%;
+  margin:10px auto 16px;
+  padding:7px 12px;
+  border-radius:999px;
+  border:1px solid #414b56;
+  background:linear-gradient(180deg,#252c34 0%,#181d23 55%,#0d1014 100%);
+  color:#cdd5de;
+  font-size:12px;
+  font-weight:650;
+  letter-spacing:.45px;
+  text-transform:uppercase;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 2px 7px rgba(0,0,0,.28);
+}
+.disc-status.present{
+  color:#eef8e8;
+  border-color:#668f52;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.06),
+    inset 0 0 0 1px rgba(143,207,60,.12),
+    0 0 8px rgba(143,207,60,.12);
+}
+.disc-status.empty{color:#89939e}
+
+/* Persistent state: restrained Sony green, deliberately subtler than blue hover */
+#receiverPanel button.input-active,
+#tvPanel button.tv-source-active{
+  border-color:#65894f !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(143,207,60,.20),
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 0 8px rgba(143,207,60,.13) !important;
+}
+#receiverPanel button.input-active::before,
+#tvPanel button.tv-source-active::before{
+  content:"";
+  position:absolute;
+  left:13%;
+  right:13%;
+  bottom:5px;
+  height:2px;
+  border-radius:2px;
+  background:#8fcf3c;
+  box-shadow:0 0 5px rgba(143,207,60,.5);
+  pointer-events:none;
+}
+
+/* Active app indicator inside the dropdown */
+.app-row.app-active{
+  background:linear-gradient(90deg,rgba(143,207,60,.12),rgba(143,207,60,.025)) !important;
+  box-shadow:inset 3px 0 0 #8fcf3c;
+}
+.app-row.app-active .app-name{
+  color:#f4ffe9;
+}
+
+/* v26 */
+
+/* v27 FINAL: Sony HOME buttons + footer wordmark.
+   Intentionally appended last so generic button rules cannot override it. */
+
+#receiverPanel button.home-sony,
+#tvPanel button.home-sony,
+#blurayPanel button.home-sony{
+  color:#f7f8fb !important;
+  border:1px solid #8b9bc0 !important;
+  background:
+    linear-gradient(
+      180deg,
+      #8292b8 0%,
+      #7485ad 12%,
+      #6578a3 48%,
+      #586b94 78%,
+      #4b5d82 100%
+    ) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.34),
+    inset 0 -2px 4px rgba(0,0,0,.28),
+    0 3px 8px rgba(0,0,0,.36) !important;
+  text-shadow:0 1px 2px rgba(0,0,0,.72) !important;
+}
+
+/* Remove the generic glossy overlay and give HOME its own restrained sheen */
+#receiverPanel button.home-sony::after,
+#tvPanel button.home-sony::after,
+#blurayPanel button.home-sony::after{
+  content:"" !important;
+  display:block !important;
+  position:absolute !important;
+  left:2% !important;
+  right:2% !important;
+  top:2% !important;
+  height:38% !important;
+  border-radius:inherit !important;
+  background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.025) 65%,transparent 100%) !important;
+  pointer-events:none !important;
+}
+
+@media (hover:hover){
+  #receiverPanel button.home-sony:hover,
+  #tvPanel button.home-sony:hover,
+  #blurayPanel button.home-sony:hover{
+    border-color:#aebce0 !important;
+    background:
+      linear-gradient(
+        180deg,
+        #92a3ca 0%,
+        #8395bd 14%,
+        #7186b2 50%,
+        #60759f 80%,
+        #50658e 100%
+      ) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.38),
+      inset 0 -2px 4px rgba(0,0,0,.25),
+      0 0 12px rgba(112,145,210,.25),
+      0 3px 8px rgba(0,0,0,.34) !important;
+  }
+}
+
+#receiverPanel button.home-sony:active,
+#tvPanel button.home-sony:active,
+#blurayPanel button.home-sony:active{
+  background:
+    linear-gradient(
+      180deg,
+      #4b5d82 0%,
+      #586b94 22%,
+      #6578a3 52%,
+      #7485ad 86%,
+      #8292b8 100%
+    ) !important;
+}
+
+/* Sony wordmark immediately above Custom LAN Remote */
+footer{
+  margin-top:22px !important;
+  color:#707780 !important;
+  font-size:11px !important;
+  letter-spacing:.55px !important;
+  text-transform:uppercase !important;
+}
+
+footer .sony-footer-logo{
+  display:block !important;
+  width:104px !important;
+  height:auto !important;
+  margin:0 auto 9px !important;
+  filter:drop-shadow(0 2px 2px rgba(0,0,0,.55)) !important;
+}
+
+
+footer .sony-footer-logo svg{
+  display:block !important;
+  width:100% !important;
+  height:auto !important;
+}
+footer .sony-footer-logo svg *{
+  fill:#ffffff !important;
+}
+
+
+/* v34 FINAL active-input treatment.
+   Appended last so the generic glossy button theme cannot hide the state. */
+#tvPanel button.tv-source-active,
+#receiverPanel button.input-active{
+  border-color:#82b965 !important;
+  background:
+    linear-gradient(
+      180deg,
+      #303a35 0%,
+      #263029 22%,
+      #1d271f 54%,
+      #141c16 80%,
+      #0c110d 100%
+    ) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.11),
+    inset 0 0 0 1px rgba(143,207,60,.22),
+    inset 0 -8px 14px rgba(0,0,0,.30),
+    0 0 11px rgba(143,207,60,.22),
+    0 3px 8px rgba(0,0,0,.28) !important;
+}
+
+/* Keep the normal glossy sheen, plus a clearly visible Sony-green status line */
+#tvPanel button.tv-source-active::before,
+#receiverPanel button.input-active::before{
+  content:"" !important;
+  display:block !important;
+  position:absolute !important;
+  left:12% !important;
+  right:12% !important;
+  bottom:5px !important;
+  height:3px !important;
+  border-radius:3px !important;
+  background:#8fcf3c !important;
+  box-shadow:0 0 7px rgba(143,207,60,.70) !important;
+  pointer-events:none !important;
+  z-index:3 !important;
+}
+
+@media (hover:hover){
+  #tvPanel button.tv-source-active:hover,
+  #receiverPanel button.input-active:hover{
+    border-color:#9dcc82 !important;
+    background:
+      linear-gradient(
+        180deg,
+        #39463f 0%,
+        #2d3a31 22%,
+        #223025 54%,
+        #172019 80%,
+        #0d130f 100%
+      ) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.12),
+      inset 0 0 0 1px rgba(143,207,60,.28),
+      0 0 15px rgba(143,207,60,.27),
+      0 3px 8px rgba(0,0,0,.28) !important;
+  }
+}
+
+
+/* v35: Intercom tab */
+.tabs{grid-template-columns:repeat(4,1fr)!important}
+
+#intercomPanel .intercom-status{
+  margin:0 0 14px;
+  min-height:34px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid #303840;
+  border-radius:10px;
+  background:linear-gradient(180deg,#171c21,#0d1115);
+  color:#9aa4ae;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.8px;
+  text-transform:uppercase;
+}
+#intercomPanel .intercom-status.ready{color:#a8d98c;border-color:#48613b}
+#intercomPanel .intercom-status.off{color:#d9ab70;border-color:#655039}
+#intercomPanel .intercom-status.error{color:#d58a8e;border-color:#633b3e}
+
+#intercomButtons{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+#intercomButtons button{
+  min-height:58px;
+  font-size:13px;
+  letter-spacing:.35px;
+}
+#intercomButtons button.playing{
+  border-color:#82b965!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.11),
+    inset 0 0 0 1px rgba(143,207,60,.22),
+    0 0 11px rgba(143,207,60,.22),
+    0 3px 8px rgba(0,0,0,.28)!important;
+}
+#intercomEmpty{
+  display:none;
+  padding:26px 12px;
+  text-align:center;
+  color:#747e88;
+  font-size:12px;
+  letter-spacing:.5px;
+}
+@media(max-width:520px){
+  #intercomButtons{grid-template-columns:1fr}
+  .tab .tab-label{font-size:9px!important}
+}
+
+
+#intercomPanel header{
+  position:relative;
+}
+#intercomSetupGear{
+  position:absolute;
+  top:9px;
+  right:10px;
+  width:28px;
+  height:28px;
+  min-height:28px;
+  padding:0;
+  border-radius:50%;
+  border:1px solid #3b434c;
+  background:linear-gradient(180deg,#23292f,#151a1f 55%,#0e1216);
+  color:#aeb6bf;
+  font-size:14px;
+  line-height:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 2px 5px rgba(0,0,0,.28);
+}
+#intercomSetupGear:hover{border-color:#6d7884;color:#fff}
+
+
+/* v37: tiny setup cog immediately after UGREEN without changing layout spacing */
+#intercomPanel header{position:static}
+#intercomPanel .ip{position:relative;display:inline-block}
+#intercomSetupGear{
+  position:absolute!important;
+  top:50%!important;
+  left:calc(100% + 5px)!important;
+  right:auto!important;
+  transform:translateY(-50%);
+  width:16px!important;
+  height:16px!important;
+  min-height:16px!important;
+  padding:0!important;
+  margin:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  color:#78828c!important;
+  font-size:11px!important;
+  line-height:16px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  text-decoration:none!important;
+}
+#intercomSetupGear:hover{color:#c8ced4!important}
+
+
+/* v38: cog tucked directly beside UGREEN and kept inside the Intercom-tab edge */
+#intercomPanel .ip{
+  position:relative!important;
+  display:inline-block!important;
+  padding-right:14px!important;
+  margin-right:-14px!important;
+}
+#intercomSetupGear{
+  position:absolute!important;
+  top:50%!important;
+  left:auto!important;
+  right:0!important;
+  transform:translateY(-50%)!important;
+  width:12px!important;
+  height:12px!important;
+  min-height:12px!important;
+  padding:0!important;
+  margin:0!important;
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  color:#78828c!important;
+  font-size:10px!important;
+  line-height:12px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+
+
+/* v39: UGREEN itself opens Intercom Setup, with zero visual hyperlink styling */
+#intercomPanel .ip{
+  position:static!important;
+  display:block!important;
+  padding-right:0!important;
+  margin-right:0!important;
+}
+#intercomPanel .ugreenSetupLink,
+#intercomPanel .ugreenSetupLink:visited,
+#intercomPanel .ugreenSetupLink:hover,
+#intercomPanel .ugreenSetupLink:active{
+  color:inherit!important;
+  font:inherit!important;
+  letter-spacing:inherit!important;
+  text-decoration:none!important;
+  background:none!important;
+  border:0!important;
+  padding:0!important;
+  margin:0!important;
+  box-shadow:none!important;
+}
+
+
+#liveIntercomBtn{
+  width:100%;
+  min-height:54px;
+  margin:0 0 6px;
+  border:1px solid #a73a41;
+  border-radius:10px;
+  color:#fff;
+  font-size:13px;
+  font-weight:800;
+  letter-spacing:.8px;
+  background:linear-gradient(180deg,#a63239,#7e2228 52%,#57171b);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.10),0 3px 7px rgba(0,0,0,.28);
+}
+#liveIntercomBtn.live{
+  background:linear-gradient(180deg,#d74750,#a82931 52%,#721b21);
+  border-color:#dc6b72;
+  animation:livePulse 1.05s infinite;
+}
+#liveIntercomBtn:disabled{opacity:.55}
+.live-hint{
+  margin:0 0 14px;
+  text-align:center;
+  color:#707b86;
+  font-size:9px;
+  font-weight:700;
+  letter-spacing:.7px;
+}
+@keyframes livePulse{
+  50%{box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 0 0 5px rgba(196,50,58,.14),0 3px 7px rgba(0,0,0,.28)}
+}
+
+
+/* v42 LIVE states + Intercom volume */
+#liveIntercomBtn{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:9px!important;
+  transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,color .18s ease!important;
+}
+#liveIntercomBtn .live-icon{
+  width:22px;
+  height:22px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+#liveIntercomBtn .live-icon svg{
+  width:20px;
+  height:20px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.9;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+#liveIntercomBtn.idle{
+  color:#d9e2ea!important;
+  border-color:#4c5a67!important;
+  background:linear-gradient(180deg,#39444e 0%,#273039 48%,#171d23 100%)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 3px 8px rgba(0,0,0,.28)!important;
+}
+#liveIntercomBtn.arming{
+  color:#ffe3a8!important;
+  border-color:#9f7b31!important;
+  background:linear-gradient(180deg,#8a6927 0%,#634a1d 50%,#372a13 100%)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.10),0 0 12px rgba(186,139,49,.18),0 3px 8px rgba(0,0,0,.28)!important;
+}
+#liveIntercomBtn.live{
+  color:#fff!important;
+  border-color:#e86770!important;
+  background:linear-gradient(180deg,#d84750 0%,#a72931 48%,#6f181f 100%)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.13),0 0 16px rgba(215,71,80,.28),0 3px 8px rgba(0,0,0,.3)!important;
+  animation:livePulse 1.05s infinite!important;
+}
+#liveIntercomBtn.error{
+  color:#ffd2d5!important;
+  border-color:#8d3b40!important;
+  background:linear-gradient(180deg,#6d2d31 0%,#482024 52%,#291316 100%)!important;
+}
+.intercom-volume-row{
+  display:grid;
+  grid-template-columns:48px minmax(0,1fr) 48px;
+  gap:9px;
+  align-items:center;
+  margin-bottom:14px;
+}
+.intercom-vol-btn{
+  min-height:42px!important;
+  height:42px!important;
+  padding:0!important;
+  font-size:20px!important;
+}
+.intercom-volume-center{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:0 2px;
+}
+#intercomVolumeValue{
+  min-width:38px;
+  color:#dce2e8;
+  font-size:11px;
+  font-weight:700;
+  text-align:right;
+}
+#intercomVolumeSlider{
+  width:100%;
+  accent-color:#8091b6;
+}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="tabs">
+  <button class="tab active" data-tab="receiver"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg></span><span class="tab-label">RECEIVER</span></button>
+  <button class="tab" data-tab="tv"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="1.5"/><path d="M8 21h8M12 17v4"/></svg></span><span class="tab-label">TV</span></button>
+  <button class="tab" data-tab="bluray"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="2.2"/><path d="M12 3.5a8.5 8.5 0 0 1 7.4 4.3"/></svg></span><span class="tab-label">BLU-RAY</span></button>
+  <button class="tab" data-tab="intercom"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 10v4h3l5 4V6L7 10H4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18 6a8.5 8.5 0 0 1 0 12"/></svg></span><span class="tab-label">INTERCOM</span></button>
+</div>
+
+<section id="receiverPanel" class="panel active">
+<header><h1>STR-ZA1100ES</h1><div class="ip">AVR · TV</div></header>
+
+<div class="grid g2">
+<button id="powerBtn" class="power unknown" onclick="powerToggle()">POWER …</button>
+<button id="audioOutputBtn" class="audio-output unknown" onclick="toggleAudioOutput()">AUDIO …</button>
+</div>
+
+<div class="label">INPUT</div>
+<div class="grid g3">
+<button data-input="tv" onclick="selectInput('GUI.tv','tv')">TV</button>
+<button id="receiverBdDvdBtn" data-input="bddvd" onclick="selectInput('GUI.bddvd','bddvd')">BD/DVD</button>
+<button data-input="game" onclick="selectInput('GUI.game','game')">GAME</button>
+<button data-input="sat" onclick="selectInput('GUI.sat','sat')">SAT/CATV</button>
+<button data-input="video" onclick="selectInput('GUI.video','video')">VIDEO</button>
+<button data-input="aux" onclick="selectInput('GUI.aux','aux')">AUX</button>
+</div>
+
+<div class="label">NAVIGATION</div>
+<div class="nav">
+<button class="up" onclick="pulse('GUI.up')">⌃</button>
+<button class="left" onclick="pulse('GUI.left')">‹</button>
+<button class="enter" onclick="pulse('GUI.enter')"><span class="trek-ok" aria-label="OK" title="OK">
+<svg viewBox="0 0 64 64" aria-hidden="true">
+  <path d="M32 5 L50 53 L32 43 L14 53 Z" fill="#d9dde3" stroke="#f5f7fa" stroke-width="1.2" stroke-linejoin="round"/>
+  <path d="M32 17 L36 31 L43 33 L36 36 L32 49 L28 36 L21 33 L28 31 Z" fill="#11161c"/>
+</svg>
+</span></button>
+<button class="right" onclick="pulse('GUI.right')">›</button>
+<button class="down" onclick="pulse('GUI.down')">⌄</button>
+</div>
+<div class="grid g3 small" style="margin-top:8px">
+<button onclick="pulse('GUI.return')">RETURN</button>
+<button class="home-sony" onclick="pulse('GUI.home')">HOME</button>
+<button onclick="pulse('GUI.optionmenu')">OPTION</button>
+</div>
+
+<div class="label">VOLUME</div>
+<div class="grid g3">
+<button class="vol" onclick="cmd('GUI.volumedown','main')">−</button>
+<button class="mute" onclick="cmd('GUI.muting','main')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4zm12.3 1.3L18 12l-1.7 1.7 1.4 1.4 1.7-1.7 1.7 1.7 1.4-1.4-1.7-1.7 1.7-1.7-1.4-1.4-1.7 1.7-1.7-1.7-1.4 1.4z"/></svg></button>
+<button class="vol" onclick="cmd('GUI.volumeup','main')">+</button>
+</div>
+
+<div class="label">SOUND FIELD</div>
+<div class="grid g4 small">
+<button onclick="cmd('GUI.2chadirect','main')">2CH</button>
+<button onclick="cmd('GUI.afd','main')">A.F.D.</button>
+<button onclick="cmd('GUI.movie','main')">MOVIE</button>
+<button onclick="cmd('GUI.multistereo','main')">MULTI ST.</button>
+</div>
+
+
+</section>
+
+<section id="tvPanel" class="panel">
+<header><h1>BRAVIA TV</h1><div class="ip">NETWORK CONTROL</div></header>
+
+<div class="grid g3">
+<button id="tvPowerBtn" class="power unknown" onclick="tvPowerToggle()">POWER …</button>
+<button data-tvkey="Input">INPUT</button>
+<button data-tvkey="SyncMenu">SYNC MENU</button>
+</div>
+
+<div class="label">APPS</div>
+<div class="app-picker">
+  <button id="appPickerBtn" type="button" class="app-picker-btn">
+    <span>SELECT APP</span>
+    <span class="chev">▾</span>
+  </button>
+  <div id="appMenu" class="app-menu" hidden></div>
+</div>
+
+<div class="label">NAVIGATION</div>
+<div class="nav">
+<button class="up" data-tvkey="Up">⌃</button>
+<button class="left" data-tvkey="Left">‹</button>
+<button class="enter" data-tvkey="Confirm"><span class="trek-ok" aria-label="OK" title="OK">
+<svg viewBox="0 0 64 64" aria-hidden="true">
+  <path d="M32 5 L50 53 L32 43 L14 53 Z" fill="#d9dde3" stroke="#f5f7fa" stroke-width="1.2" stroke-linejoin="round"/>
+  <path d="M32 17 L36 31 L43 33 L36 36 L32 49 L28 36 L21 33 L28 31 Z" fill="#11161c"/>
+</svg>
+</span></button>
+<button class="right" data-tvkey="Right">›</button>
+<button class="down" data-tvkey="Down">⌄</button>
+</div>
+<div class="grid g3 small" style="margin-top:8px">
+<button data-tvkey="Return">RETURN</button>
+<button class="home-sony" data-tvkey="Home">HOME</button>
+<button data-tvkey="Options">OPTIONS</button>
+</div>
+
+<div class="label">VOLUME</div>
+<div class="grid g3">
+<button class="vol" data-tvkey="VolumeDown">−</button>
+<button class="mute" data-tvkey="Mute"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4zm12.3 1.3L18 12l-1.7 1.7 1.4 1.4 1.7-1.7 1.7 1.7 1.4-1.4-1.7-1.7 1.7-1.7-1.4-1.4-1.7 1.7-1.7-1.7-1.4 1.4z"/></svg></button>
+<button class="vol" data-tvkey="VolumeUp">+</button>
+</div>
+
+<div class="label">CHANNEL</div>
+<div class="grid g2">
+<button data-tvkey="ChannelDown">CHANNEL −</button>
+<button data-tvkey="ChannelUp">CHANNEL +</button>
+</div>
+
+<div class="label">PLAYBACK</div>
+<div class="grid g3 small">
+<button data-tvkey="Rewind"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5v14l-9-7 9-7zm11 0v14l-9-7 9-7z"/></svg></button>
+<button data-tvkey="Play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16l13-8L7 4z"/></svg></button>
+<button data-tvkey="Pause"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/></svg></button>
+</div>
+<div class="grid g3 small" style="margin-top:8px">
+<button data-tvkey="Stop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v14H5V5z"/></svg></button>
+<button data-tvkey="Forward"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 5v14l9-7-9-7zm11 0v14l9-7-9-7z"/></svg></button>
+<button data-tvkey="Netflix">NETFLIX</button>
+</div>
+
+<div class="label">HDMI</div>
+<div class="grid g4 small">
+<button data-tvkey="Hdmi1" data-tvinput="hdmi1">HDMI 1</button>
+<button data-tvkey="Hdmi2" data-tvinput="hdmi2">HDMI 2</button>
+<button data-tvkey="Hdmi3" data-tvinput="hdmi3">HDMI 3</button>
+<button data-tvkey="Hdmi4" data-tvinput="hdmi4">HDMI 4</button>
+</div>
+</section>
+
+<section id="blurayPanel" class="panel">
+<header><h1>BDP-S6700</h1><div class="ip">DIRECT IP CONTROL</div></header>
+<div id="bdpDiscStatus" class="disc-status">DISC: CHECKING…</div>
+
+<div class="grid g2">
+<button id="bdpPowerBtn" class="power unknown" type="button">POWER …</button>
+<button data-bdkey="Options">OPTIONS</button>
+</div>
+
+<div class="label">NAVIGATION</div>
+<div class="nav">
+<button class="up" data-bdkey="Up">⌃</button>
+<button class="left" data-bdkey="Left">‹</button>
+<button class="enter" data-bdkey="Confirm"><span class="trek-ok" aria-label="OK" title="OK">
+<svg viewBox="0 0 64 64" aria-hidden="true">
+  <path d="M32 5 L50 53 L32 43 L14 53 Z" fill="#d9dde3" stroke="#f5f7fa" stroke-width="1.2" stroke-linejoin="round"/>
+  <path d="M32 17 L36 31 L43 33 L36 36 L32 49 L28 36 L21 33 L28 31 Z" fill="#11161c"/>
+</svg>
+</span></button>
+<button class="right" data-bdkey="Right">›</button>
+<button class="down" data-bdkey="Down">⌄</button>
+</div>
+
+<div class="grid g3 small" style="margin-top:8px">
+<button data-bdkey="Return">RETURN</button>
+<button class="home-sony" data-bdkey="Home">HOME</button>
+<button data-bdkey="Display">DISPLAY</button>
+</div>
+
+<div class="label">DISC MENU</div>
+<div class="grid g2">
+<button data-bdkey="TopMenu">TOP MENU</button>
+<button data-bdkey="PopupMenu">POP UP/MENU</button>
+</div>
+
+<div class="label">PLAYBACK</div>
+<div class="grid g3">
+<button data-bdkey="Prev"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h2v14H6V5zm3 7 9-7v14l-9-7z"/></svg></button>
+<button data-bdkey="Play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16l13-8L7 4z"/></svg></button>
+<button data-bdkey="Next"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 5h2v14h-2V5zM6 5v14l9-7-9-7z"/></svg></button>
+</div>
+<div class="grid g3" style="margin-top:8px">
+<button data-bdkey="Rewind"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5v14l-9-7 9-7zm11 0v14l-9-7 9-7z"/></svg></button>
+<button data-bdkey="Pause"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/></svg></button>
+<button data-bdkey="Forward"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 5v14l9-7-9-7zm11 0v14l9-7-9-7z"/></svg></button>
+</div>
+<div class="grid g3 small" style="margin-top:8px">
+<button data-bdkey="Stop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v14H5V5z"/></svg></button>
+<button data-bdkey="Eject"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4 4 14h16L12 4zM4 17h16v3H4v-3z"/></svg></button>
+<button data-bdkey="SubTitle">SUBTITLE</button>
+</div>
+
+<div class="label">AUDIO</div>
+<div class="grid g3">
+<button class="vol" data-tvkey="VolumeDown">−</button>
+<button class="mute" data-tvkey="Mute"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4zm12.3 1.3L18 12l-1.7 1.7 1.4 1.4 1.7-1.7 1.7 1.7 1.4-1.4-1.7-1.7 1.7-1.7-1.4-1.4-1.7 1.7-1.7-1.7-1.4 1.4z"/></svg></button>
+<button class="vol" data-tvkey="VolumeUp">+</button>
+</div>
+</section>
+
+
+<section id="intercomPanel" class="panel">
+<header>
+  <h1>WHOLE HOUSE INTERCOM</h1>
+  <div class="ip">SONANCE · STR-ZA1100ES · <a class="ugreenSetupLink" href="/intercom/" title="Intercom Setup">UGREEN</a></div>
+</header>
+
+<div id="intercomStatus" class="intercom-status">CHECKING INTERCOM…</div>
+
+<button id="liveIntercomBtn" class="live-intercom-btn idle" type="button">
+  <span class="live-icon" aria-hidden="true">
+    <svg viewBox="0 0 24 24">
+      <rect x="9" y="3" width="6" height="11" rx="3"></rect>
+      <path d="M6.5 11.5a5.5 5.5 0 0 0 11 0M12 17v4M9 21h6"></path>
+    </svg>
+  </span>
+  <span id="liveIntercomLabel">LIVE</span>
+</button>
+<div id="liveHint" class="live-hint">TAP TO TALK · TAP AGAIN TO STOP</div>
+
+<div class="label">INTERCOM VOLUME</div>
+<div class="intercom-volume-row">
+  <button id="intercomVolDown" class="intercom-vol-btn" type="button" aria-label="Intercom volume down">−</button>
+  <div class="intercom-volume-center">
+    <span id="intercomVolumeValue">70%</span>
+    <input id="intercomVolumeSlider" type="range" min="0" max="100" step="5" value="70" aria-label="Intercom volume">
+  </div>
+  <button id="intercomVolUp" class="intercom-vol-btn" type="button" aria-label="Intercom volume up">+</button>
+</div>
+
+<div class="label">ANNOUNCEMENTS</div>
+<div id="intercomButtons"></div>
+<div id="intercomEmpty">NO ENABLED ANNOUNCEMENTS</div>
+</section>
+
+<footer><span class="sony-footer-logo"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 1280 225.27997"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="logo (2).svg"
+   inkscape:version="1.4 (e7c3feb100, 2024-10-09)"
+   width="1280"
+   height="225.27997"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="0.22421875"
+     inkscape:cx="640"
+     inkscape:cy="111.49826"
+     inkscape:window-width="1280"
+     inkscape:window-height="730"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g4" />
+  <defs
+     id="defs1" />
+  <g
+     id="Layer_2">
+    <g
+       id="g4"
+       inkscape:label="logo">
+      <path
+         d="m 456.0129,225.27997 c -46.41279,0 -89.42079,-13.82399 -118.09279,-39.60319 A 96.895989,96.895989 0 0 1 305.79212,112.48639 98.329588,98.329588 0 0 1 337.92011,39.551995 C 364.54411,15.359998 411.64811,0 456.0129,0 c 49.07519,0 88.37119,12.364799 118.39999,39.603195 a 97.407989,97.407989 0 0 1 31.69279,72.883195 101.52959,101.52959 0 0 1 -31.69279,73.19039 c -27.9808,25.9328 -71.9104,39.60319 -118.39999,39.60319 v -29.64479 c 24.6016,0 47.43679,-8.4992 63.38559,-24.3712 15.9488,-15.872 23.1936,-35.1232 23.1936,-58.87999 0,-22.681601 -7.9616,-43.878398 -23.1936,-58.879996 -15.744,-15.487998 -39.11679,-24.217597 -63.38559,-24.217597 -24.2688,0 -47.74399,8.652799 -63.48799,24.217597 -15.1808,15.027198 -23.04,36.300795 -23.04,58.879996 a 82.35519,82.35519 0 0 0 23.04,58.87999 c 15.744,15.6928 39.06559,24.3712 63.48799,24.3712 z M 117.12014,0 C 92.313748,0 64.128151,4.6591995 40.320154,15.359998 18.099355,25.292797 1.5754749e-4,41.241595 1.5754749e-4,67.686392 A 54.220794,54.220794 0 0 0 14.720156,104.95999 c 6.425599,5.9392 16.793599,16.0256 43.878396,21.9648 12.108798,2.55999 37.990395,6.68159 63.769588,9.39519 25.7792,2.7136 50.7648,5.12 61.0048,7.8592 8.1408,2.0736 21.83679,4.8896 21.83679,20.2496 0,15.36 -14.41279,19.968 -16.92159,20.9664 -2.5088,0.9984 -19.8144,8.9344 -50.8928,8.9344 a 216.42237,216.42237 0 0 1 -60.59519,-10.4192 c -11.596799,-4.1472 -23.756797,-9.6 -35.097596,-23.4496 a 40.268795,40.268795 0 0 1 -7.295999,-22.2208 H 6.2465567 v 78.84799 H 37.529754 v -10.67519 a 4.4543995,4.4543995 0 0 1 6.7584,-3.84 246.42557,246.42557 0 0 0 45.772794,14.79679 c 16.435202,3.4304 27.059192,5.9136 47.487992,5.9136 a 202.62398,202.62398 0 0 0 63.6416,-8.9856 111.07839,111.07839 0 0 0 37.81119,-18.66239 51.814394,51.814394 0 0 0 20.24959,-41.4976 58.060793,58.060793 0 0 0 -16.35839,-40.80639 72.012792,72.012792 0 0 0 -20.1728,-13.798402 148.60798,148.60798 0 0 0 -24.88319,-8.678399 c -16.2304,-3.967999 -52.6848,-8.934399 -70.1184,-10.675198 -18.27839,-1.8944 -49.99679,-4.5312 -62.668789,-8.447999 -3.839999,-1.2032 -11.673599,-4.9152 -11.673599,-14.003199 0,-6.476799 3.584,-11.955198 10.649599,-16.383998 C 75.26415,34.303996 97.945747,29.926396 121.60014,29.926396 a 166.98878,166.98878 0 0 1 66.7136,13.030399 72.857591,72.857591 0 0 1 15.87199,9.471999 47.718394,47.718394 0 0 1 15.6416,26.163197 h 25.2672 V 9.9583988 h -28.16 v 7.9615992 c 0,2.56 -2.56,5.939199 -7.68,3.1488 C 196.55694,14.463998 160.87054,0.17919998 117.12014,0 Z m 618.21433,12.595199 137.62558,124.185581 -1.408,-83.609586 c -0.1536,-10.982399 -2.1504,-15.564798 -14.0288,-15.564798 H 831.66726 V 12.595199 h 117.75998 v 25.011197 h -25.26719 c -12.0832,0 -12.8,3.891199 -13.0048,15.564798 l 2.1248,159.769586 h -40.32 L 714.41927,71.475192 V 171.85278 c 0.128,10.9312 0.64,16.0768 11.8784,16.0768 h 28.16 v 25.0112 H 639.02728 v -25.0112 h 27.0336 c 10.08639,0 9.67679,-9.6256 9.67679,-16.64 V 54.118394 c 0,-7.679999 -1.0752,-16.486398 -16.89599,-16.486398 h -21.9136 V 12.595199 Z M 1083.776,187.87838 a 55.859193,55.859193 0 0 0 6.9632,-0.4352 8.627199,8.627199 0 0 0 5.4272,-4.8128 28.006397,28.006397 0 0 0 0.5376,-5.4016 v -39.552 c 0,-1.3312 0,-1.3568 -1.6896,-3.456 -1.6896,-2.0992 -72.0896,-81.919986 -75.2896,-85.503986 -3.9936,-4.351999 -11.008,-11.084798 -21.68316,-11.084798 h -24.448 V 12.595199 h 137.98396 v 24.985597 h -16.64 c -3.84,0 -6.4,3.660799 -3.1232,7.679999 0,0 46.4384,55.551995 46.8736,56.140795 0.4352,0.5888 0.8192,0.7168 1.408,0.1792 0.5888,-0.5376 47.5904,-55.807995 47.9488,-56.319995 a 4.7871994,4.7871994 0 0 0 -4.096,-7.679999 h -17.0752 V 12.595199 H 1280 v 25.036797 h -25.2672 c -9.1648,0 -12.8,1.689599 -19.7888,9.471998 l -76.16,86.886386 a 5.3759994,5.3759994 0 0 0 -0.9216,3.6864 v 39.5264 a 28.159997,28.159997 0 0 0 0.5632,5.4016 8.524799,8.524799 0 0 0 5.4016,4.8128 50.611194,50.611194 0 0 0 6.912,0.4352 h 25.8304 v 25.0368 h -137.2672 v -25.0368 z"
+         id="path1"
+         fill="#ffffff"
+         style="stroke-width:2.56" />
+    </g>
+  </g>
+</svg>
+</span>Custom LAN Remote</footer>
+</div>
+<div id="toast"></div>
+
+<script>
+let rid=0,powerState='unknown',audioOutputState='unknown';
+const toast=document.getElementById('toast'),powerBtn=document.getElementById('powerBtn'),audioOutputBtn=document.getElementById('audioOutputBtn'),inputButtons=[...document.querySelectorAll('[data-input]')];
+const tabs=[...document.querySelectorAll('.tab')],panels={receiver:document.getElementById('receiverPanel'),tv:document.getElementById('tvPanel'),bluray:document.getElementById('blurayPanel'),intercom:document.getElementById('intercomPanel')};
+const tvButtons=[...document.querySelectorAll('[data-tvkey]')];
+const bdButtons=[...document.querySelectorAll('[data-bdkey]')];
+const bdpPowerBtn=document.getElementById('bdpPowerBtn');
+let bdpPowerState='unknown';
+const tvPowerBtn=document.getElementById('tvPowerBtn');
+let irccMap={};
+let tvPowerState='unknown';
+
+function notify(msg){toast.textContent=msg;toast.classList.add('show');clearTimeout(window._tt);window._tt=setTimeout(()=>toast.classList.remove('show'),1200)}
+function nextId(){rid++;if(rid>999)rid=1;return rid}
+function showTab(name){
+  if(name!=='intercom' && (liveSending||liveSessionId)) stopLiveIntercom();
+  tabs.forEach(t=>t.classList.toggle('active',t.dataset.tab===name));
+  Object.entries(panels).forEach(([k,p])=>p.classList.toggle('active',k===name));
+  if(name==='intercom') refreshIntercom();
+}
+
+
+tabs.forEach(t=>t.addEventListener('click',()=>showTab(t.dataset.tab)));
+
+async function avrPost(body){return fetch('/request.cgi',{method:'POST',cache:'no-store',headers:{'Content-Type':'application/json','Pragma':'no-cache','Cache-Control':'no-cache, no-store'},body:JSON.stringify(body)})}
+async function tvAudioPost(body){return fetch('/tv/audio',{method:'POST',cache:'no-store',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})}
+async function tvSystemPost(body){return fetch('/tv/system',{method:'POST',cache:'no-store',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})}
+async function tvAppPost(body){return fetch('/tv/app',{method:'POST',cache:'no-store',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})}
+async function tvIrcc(code){return fetch('/tv/ircc',{method:'POST',cache:'no-store',headers:{'Content-Type':'text/xml; charset=UTF-8','SOAPAction':'"urn:schemas-sony-com:service:IRCC:1#X_SendIRCC"'},body:'<?xml version="1.0"?><s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:X_SendIRCC xmlns:u="urn:schemas-sony-com:service:IRCC:1"><IRCCCode>'+code+'</IRCCCode></u:X_SendIRCC></s:Body></s:Envelope>'})}
+async function bdpIrcc(code){return fetch('/bdp/ircc',{method:'POST',cache:'no-store',headers:{'Content-Type':'text/xml; charset=UTF-8','SOAPAction':'"urn:schemas-sony-com:service:IRCC:1#X_SendIRCC"'},body:'<?xml version="1.0"?><s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:X_SendIRCC xmlns:u="urn:schemas-sony-com:service:IRCC:1"><IRCCCode>'+code+'</IRCCCode></u:X_SendIRCC></s:Body></s:Envelope>'})}
+
+async function bdpStatus(){
+  return fetch('/bdp/status',{
+    method:'GET',
+    cache:'no-store',
+    headers:{'Pragma':'no-cache','Cache-Control':'no-cache, no-store'}
+  });
+}
+
+
+const INTERCOM_BASE='/intercom';
+const intercomStatus=document.getElementById('intercomStatus');
+const intercomButtons=document.getElementById('intercomButtons');
+const intercomEmpty=document.getElementById('intercomEmpty');
+let intercomBusy=false;
+const liveIntercomBtn=document.getElementById('liveIntercomBtn');
+const liveHint=document.getElementById('liveHint');
+let liveStream=null;
+let liveAudioContext=null;
+let liveProcessor=null;
+let liveSource=null;
+let liveSessionId=null;
+let liveSending=false;
+let liveStopRequested=false;
+let liveChunkChain=Promise.resolve();
+const liveIntercomLabel=document.getElementById('liveIntercomLabel');
+const intercomVolDown=document.getElementById('intercomVolDown');
+const intercomVolUp=document.getElementById('intercomVolUp');
+const intercomVolumeSlider=document.getElementById('intercomVolumeSlider');
+const intercomVolumeValue=document.getElementById('intercomVolumeValue');
+let intercomVolumeSaveTimer=null;
+
+
+function setIntercomStatus(text,state=''){
+  intercomStatus.textContent=text;
+  intercomStatus.className='intercom-status'+(state?' '+state:'');
+}
+
+async function intercomJson(path,options={}){
+  const r=await fetch(INTERCOM_BASE+path,{cache:'no-store',...options});
+  const data=await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(data.error||('HTTP '+r.status));
+  return data;
+}
+
+
+function floatTo16BitPCM(float32){
+  const out=new Int16Array(float32.length);
+  for(let i=0;i<float32.length;i++){
+    const s=Math.max(-1,Math.min(1,float32[i]));
+    out[i]=s<0?s*0x8000:s*0x7fff;
+  }
+  return out.buffer;
+}
+
+async function sendLiveChunk(buffer){
+  if(!liveSessionId || liveStopRequested || !buffer.byteLength) return;
+  const session=liveSessionId;
+  liveChunkChain=liveChunkChain.then(async()=>{
+    if(!liveSessionId || liveSessionId!==session || liveStopRequested) return;
+    const r=await fetch(INTERCOM_BASE+'/api/live/'+encodeURIComponent(session)+'/audio',{
+      method:'POST',
+      headers:{'Content-Type':'application/octet-stream'},
+      body:buffer
+    });
+    if(!r.ok){
+      const data=await r.json().catch(()=>({}));
+      throw new Error(data.error||('HTTP '+r.status));
+    }
+  }).catch(async e=>{
+    console.error('Live audio send failed',e);
+    setIntercomStatus('LIVE AUDIO FAILED','error');
+    await stopLiveIntercom();
+  });
+}
+
+async function startLiveIntercom(){
+  if(liveSending) return;
+  try{
+    const power=await intercomJson('/api/receiver-power');
+    if(power.power!=='on'){
+      setIntercomStatus('RECEIVER MUST BE ON','off');
+      notify('Receiver must be on');
+      return;
+    }
+
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+      throw new Error('Microphone is unavailable in this browser');
+    }
+
+    liveIntercomBtn.classList.remove('idle','live','error');
+    liveIntercomBtn.classList.add('arming');
+    liveIntercomLabel.textContent='CONNECTING';
+    setIntercomStatus('REQUESTING MICROPHONE…');
+    liveStream=await navigator.mediaDevices.getUserMedia({
+      audio:{
+        echoCancellation:true,
+        noiseSuppression:true,
+        autoGainControl:true,
+        channelCount:1
+      }
+    });
+
+    const AudioCtx=window.AudioContext||window.webkitAudioContext;
+    liveAudioContext=new AudioCtx();
+    if(liveAudioContext.state==='suspended') await liveAudioContext.resume();
+
+    const started=await intercomJson('/api/live/start',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({sample_rate:liveAudioContext.sampleRate})
+    });
+    liveSessionId=started.session_id;
+
+    liveSource=liveAudioContext.createMediaStreamSource(liveStream);
+    liveProcessor=liveAudioContext.createScriptProcessor(2048,1,1);
+    const silentGain=liveAudioContext.createGain();
+    silentGain.gain.value=0;
+
+    liveProcessor.onaudioprocess=e=>{
+      if(!liveSending || liveStopRequested) return;
+      const input=e.inputBuffer.getChannelData(0);
+      sendLiveChunk(floatTo16BitPCM(input));
+    };
+
+    liveSource.connect(liveProcessor);
+    liveProcessor.connect(silentGain);
+    silentGain.connect(liveAudioContext.destination);
+
+    liveSending=true;
+    liveStopRequested=false;
+    liveIntercomBtn.classList.remove('idle','arming','error');
+    liveIntercomBtn.classList.add('live');
+    liveIntercomLabel.textContent='LIVE · TAP TO STOP';
+    liveHint.textContent='MICROPHONE IS LIVE THROUGH THE HOUSE';
+    setIntercomStatus('LIVE INTERCOM','ready');
+  }catch(e){
+    console.error(e);
+    liveIntercomBtn.classList.remove('idle','arming','live');
+    liveIntercomBtn.classList.add('error');
+    liveIntercomLabel.textContent='LIVE ERROR';
+    setIntercomStatus(e.message||'LIVE FAILED','error');
+    setTimeout(()=>cleanupLiveClient(),900);
+  }
+}
+
+async function cleanupLiveClient(){
+  liveSending=false;
+  liveStopRequested=true;
+
+  try{if(liveProcessor){liveProcessor.disconnect();liveProcessor.onaudioprocess=null}}catch(e){}
+  try{if(liveSource)liveSource.disconnect()}catch(e){}
+  if(liveStream){try{liveStream.getTracks().forEach(t=>t.stop())}catch(e){}}
+  if(liveAudioContext){try{await liveAudioContext.close()}catch(e){}}
+
+  liveProcessor=null;
+  liveSource=null;
+  liveStream=null;
+  liveAudioContext=null;
+
+  liveIntercomBtn.classList.remove('live','arming','error');
+  liveIntercomBtn.classList.add('idle');
+  liveIntercomLabel.textContent='LIVE';
+  liveHint.textContent='TAP TO TALK · TAP AGAIN TO STOP';
+}
+
+async function stopLiveIntercom(){
+  if(!liveSessionId && !liveSending){
+    await cleanupLiveClient();
+    return;
+  }
+
+  liveStopRequested=true;
+  const session=liveSessionId;
+
+  await cleanupLiveClient();
+
+  try{await liveChunkChain}catch(e){}
+  liveChunkChain=Promise.resolve();
+
+  if(session){
+    try{
+      await intercomJson('/api/live/'+encodeURIComponent(session)+'/stop',{method:'POST'});
+    }catch(e){console.error(e)}
+  }
+  liveSessionId=null;
+  setIntercomStatus('INTERCOM READY','ready');
+}
+
+liveIntercomBtn.addEventListener('click',async()=>{
+  liveIntercomBtn.disabled=true;
+  try{
+    if(liveSending || liveSessionId) await stopLiveIntercom();
+    else await startLiveIntercom();
+  }finally{
+    liveIntercomBtn.disabled=false;
+  }
+});
+
+
+
+async function loadIntercomVolume(){
+  try{
+    const s=await intercomJson('/api/settings');
+    const v=Math.max(0,Math.min(100,Number(s.announcement_volume ?? 70)));
+    intercomVolumeSlider.value=v;
+    intercomVolumeValue.textContent=v+'%';
+  }catch(e){
+    console.error('Unable to load intercom volume',e);
+  }
+}
+function setIntercomVolume(v){
+  v=Math.max(0,Math.min(100,Math.round(Number(v)/5)*5));
+  intercomVolumeSlider.value=v;
+  intercomVolumeValue.textContent=v+'%';
+  clearTimeout(intercomVolumeSaveTimer);
+  intercomVolumeSaveTimer=setTimeout(async()=>{
+    try{
+      await intercomJson('/api/settings',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({announcement_volume:v})
+      });
+    }catch(e){
+      console.error('Unable to save intercom volume',e);
+      setIntercomStatus('VOLUME SAVE FAILED','error');
+    }
+  },180);
+}
+intercomVolDown.addEventListener('click',()=>setIntercomVolume(Number(intercomVolumeSlider.value)-5));
+intercomVolUp.addEventListener('click',()=>setIntercomVolume(Number(intercomVolumeSlider.value)+5));
+intercomVolumeSlider.addEventListener('input',()=>setIntercomVolume(intercomVolumeSlider.value));
+
+async function refreshIntercom(){
+  loadIntercomVolume();
+  try{
+    const [items,power]=await Promise.all([
+      intercomJson('/api/enabled'),
+      intercomJson('/api/receiver-power')
+    ]);
+
+    intercomButtons.innerHTML='';
+    intercomEmpty.style.display=items.length?'none':'block';
+
+    for(const item of items){
+      const b=document.createElement('button');
+      b.type='button';
+      b.textContent=item.label;
+      b.addEventListener('click',()=>playIntercom(item,b));
+      intercomButtons.appendChild(b);
+    }
+
+    if(power.power==='on'){
+      setIntercomStatus('INTERCOM READY','ready');
+    }else{
+      setIntercomStatus('RECEIVER MUST BE ON','off');
+    }
+  }catch(e){
+    setIntercomStatus('INTERCOM UNAVAILABLE','error');
+  }
+}
+
+async function playIntercom(item,button){
+  if(intercomBusy) return;
+
+  try{
+    const power=await intercomJson('/api/receiver-power');
+    if(power.power!=='on'){
+      setIntercomStatus('RECEIVER MUST BE ON','off');
+      notify('Receiver must be on');
+      return;
+    }
+
+    intercomBusy=true;
+    [...intercomButtons.querySelectorAll('button')].forEach(b=>b.disabled=true);
+    button.classList.add('playing');
+    setIntercomStatus('PLAYING '+item.label,'ready');
+
+    await intercomJson('/api/announcements/'+encodeURIComponent(item.id)+'/play',{
+      method:'POST'
+    });
+
+    setIntercomStatus('INTERCOM READY','ready');
+  }catch(e){
+    setIntercomStatus('PLAYBACK FAILED','error');
+    notify('Intercom playback failed');
+  }finally{
+    intercomBusy=false;
+    button.classList.remove('playing');
+    [...intercomButtons.querySelectorAll('button')].forEach(b=>b.disabled=false);
+  }
+}
+
+function setBdpPowerState(state){
+  bdpPowerState=state;
+  bdpPowerBtn.classList.remove('on','off','unknown');
+  bdpPowerBtn.classList.add(state);
+  bdpPowerBtn.textContent=state==='on'?'POWER OFF':state==='off'?'POWER ON':'POWER …';
+}
+
+async function checkBdpPower(){
+  try{
+    const r=await bdpStatus();
+    if(r.ok){
+      setBdpPowerState('on');
+      return 'on';
+    }
+    setBdpPowerState('off');
+    return 'off';
+  }catch(e){
+    setBdpPowerState('off');
+    return 'off';
+  }
+}
+
+async function wakeBdp(){
+  return fetch('/bdp/wake',{
+    method:'POST',
+    cache:'no-store'
+  });
+}
+
+async function toggleBdpPower(){
+  bdpPowerBtn.disabled=true;
+  try{
+    let state=bdpPowerState;
+    if(state==='unknown'){
+      state=await checkBdpPower();
+    }
+
+    if(state==='on'){
+      const r=await bdpIrcc(bdpCommands.Power);
+      if(!r.ok) throw new Error('BDP IRCC '+r.status);
+      setBdpPowerState('off');
+      notify('Blu-ray powering off');
+    }else{
+      const r=await wakeBdp();
+      if(!r.ok) throw new Error('BDP wake '+r.status);
+      setBdpPowerState('on');
+      notify('Blu-ray powering on');
+    }
+
+    setTimeout(checkBdpPower,2000);
+    setTimeout(checkBdpPower,6000);
+    setTimeout(checkBdpPower,10000);
+  }catch(e){
+    console.error(e);
+    notify('Blu-ray power failed');
+    setBdpPowerState('unknown');
+  }finally{
+    setTimeout(()=>bdpPowerBtn.disabled=false,500);
+  }
+}
+
+bdpPowerBtn.addEventListener('click',toggleBdpPower);
+
+
+function setTvPowerState(state){
+  tvPowerState=state;
+  tvPowerBtn.classList.remove('on','off','unknown');
+  tvPowerBtn.classList.add(state);
+  tvPowerBtn.textContent=state==='on'?'POWER OFF':state==='off'?'POWER ON':'POWER …';
+}
+
+async function checkTvPower(){
+  try{
+    const r=await tvSystemPost({
+      method:'getPowerStatus',
+      id:50,
+      params:[],
+      version:'1.0'
+    });
+
+    if(!r.ok){
+      setTvPowerState('unknown');
+      return 'unknown';
+    }
+
+    const d=await r.json().catch(()=>null);
+    let status=null;
+
+    if(d && Array.isArray(d.result)){
+      const stack=[...d.result];
+      while(stack.length){
+        const x=stack.shift();
+        if(x && typeof x==='object'){
+          if(typeof x.status==='string'){status=x.status;break}
+          if(Array.isArray(x)) stack.push(...x);
+          else stack.push(...Object.values(x));
+        }
+      }
+    }
+
+    if(status==='active') setTvPowerState('on');
+    else if(status==='standby') setTvPowerState('off');
+    else setTvPowerState('unknown');
+
+    return tvPowerState;
+  }catch(e){
+    setTvPowerState('off');
+    return 'off';
+  }
+}
+
+async function setTvPower(on){
+  const r=await tvSystemPost({
+    method:'setPowerStatus',
+    id:55,
+    params:[{status:!!on}],
+    version:'1.0'
+  });
+
+  if(!r.ok) throw new Error('TV HTTP '+r.status);
+  const d=await r.json().catch(()=>null);
+  if(d && d.error) throw new Error(JSON.stringify(d.error));
+  return true;
+}
+
+async function tvPowerToggle(){
+  tvPowerBtn.disabled=true;
+  try{
+    let state=tvPowerState;
+    if(state==='unknown'){
+      state=await checkTvPower();
+    }
+
+    if(state==='on'){
+      await setTvPower(false);
+      setTvPowerState('off');
+      notify('TV powering off');
+    }else{
+      await setTvPower(true);
+      setTvPowerState('on');
+      notify('TV powering on');
+    }
+
+    setTimeout(checkTvPower,1500);
+    setTimeout(checkTvPower,4000);
+  }catch(e){
+    console.error(e);
+    notify('TV power control failed');
+    setTvPowerState('unknown');
+  }finally{
+    setTimeout(()=>tvPowerBtn.disabled=false,500);
+  }
+}
+
+
+let installedApps=[];
+const appPickerBtn=document.getElementById('appPickerBtn');
+const appMenu=document.getElementById('appMenu');
+const APP_RECENT_KEY='sonyRemoteRecentAppsV1';
+const MAX_RECENT_APPS=6;
+
+function getRecentApps(){
+  try{
+    const arr=JSON.parse(localStorage.getItem(APP_RECENT_KEY)||'[]');
+    return Array.isArray(arr)?arr:[];
+  }catch(e){return []}
+}
+
+function rememberRecentApp(uri){
+  let recent=getRecentApps().filter(x=>x!==uri);
+  recent.unshift(uri);
+  recent=recent.slice(0,MAX_RECENT_APPS);
+  localStorage.setItem(APP_RECENT_KEY,JSON.stringify(recent));
+}
+
+function sortAppsByRecent(apps){
+  const recent=getRecentApps();
+  const rank=new Map(recent.map((uri,i)=>[uri,i]));
+  return [...apps].sort((a,b)=>{
+    const ar=rank.has(a.uri)?rank.get(a.uri):9999;
+    const br=rank.has(b.uri)?rank.get(b.uri):9999;
+    if(ar!==br) return ar-br;
+    return String(a.title).localeCompare(String(b.title));
+  });
+}
+
+function renderAppMenu(){
+  const recent=getRecentApps();
+  const apps=sortAppsByRecent(installedApps);
+  appMenu.innerHTML='';
+
+  apps.forEach(app=>{
+    const row=document.createElement('button');
+    row.type='button';
+    row.className='app-row';
+    row.dataset.appUri=String(app.uri||'');
+    row.dataset.appTitle=String(app.title||'');
+
+    if(app.icon){
+      const img=document.createElement('img');
+      img.className='app-icon';
+      img.src=app.icon;
+      img.alt='';
+      img.loading='lazy';
+      img.onerror=()=>{
+        const fb=document.createElement('div');
+        fb.className='app-icon-fallback';
+        fb.textContent=String(app.title||'?').slice(0,1).toUpperCase();
+        img.replaceWith(fb);
+      };
+      row.appendChild(img);
+    }else{
+      const fb=document.createElement('div');
+      fb.className='app-icon-fallback';
+      fb.textContent=String(app.title||'?').slice(0,1).toUpperCase();
+      row.appendChild(fb);
+    }
+
+    const name=document.createElement('span');
+    name.className='app-name';
+    name.textContent=app.title;
+    row.appendChild(name);
+
+    if(recent.includes(app.uri)){
+      const badge=document.createElement('span');
+      badge.className='app-uses';
+      badge.textContent='RECENT';
+      badge.title='Recently launched from this remote';
+      row.appendChild(badge);
+    }
+
+    row.addEventListener('click',()=>launchApp(app));
+    appMenu.appendChild(row);
+  });
+  refreshActiveAppRows();
+}
+
+async function loadTvApps(){
+  try{
+    const r=await tvAppPost({
+      method:'getApplicationList',
+      id:60,
+      params:[],
+      version:'1.0'
+    });
+    if(!r.ok) throw new Error('App list HTTP '+r.status);
+
+    const d=await r.json();
+    const apps=d&&d.result&&d.result[0];
+    if(!Array.isArray(apps)) throw new Error('No application list');
+
+    installedApps=apps.filter(a=>a&&a.title&&a.uri);
+    renderAppMenu();
+  }catch(e){
+    console.error(e);
+    appMenu.innerHTML='<div style="padding:14px;color:#999">Apps unavailable</div>';
+    notify('TV app list failed');
+  }
+}
+
+async function launchApp(app){
+  appPickerBtn.disabled=true;
+  try{
+    const r=await tvAppPost({
+      method:'setActiveApp',
+      id:601,
+      params:[{uri:app.uri}],
+      version:'1.0'
+    });
+    if(!r.ok) throw new Error('Launch HTTP '+r.status);
+
+    const d=await r.json().catch(()=>null);
+    if(d&&d.error) throw new Error(JSON.stringify(d.error));
+
+    rememberRecentApp(app.uri);
+    activeTvAppUri=String(app.uri||'');
+    activeTvAppTitle=String(app.title||'');
+    setTvActiveInput('');
+    refreshActiveAppRows();
+    renderAppMenu();
+    appMenu.hidden=true;
+    appPickerBtn.querySelector('span:first-child').textContent='SELECT APP';
+    notify(app.title+' launching');
+  }catch(e){
+    console.error(e);
+    notify('App launch failed');
+  }finally{
+    appPickerBtn.disabled=false;
+  }
+}
+
+appPickerBtn.addEventListener('click',()=>{
+  appMenu.hidden=!appMenu.hidden;
+  if(!appMenu.hidden) renderAppMenu();
+});
+
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.app-picker')) appMenu.hidden=true;
+});
+
+async function loadIrccMap(){
+  try{
+    const r=await tvSystemPost({method:'getRemoteControllerInfo',id:10,params:[],version:'1.0'});
+    if(!r.ok){notify('TV remote info failed');return}
+    const d=await r.json();
+    const list=d&&d.result&&d.result[1];
+    if(Array.isArray(list)) list.forEach(x=>{if(x&&x.name&&x.value)irccMap[x.name]=x.value});
+  }catch(e){notify('TV remote unavailable')}
+}
+
+const bdpCommands={
+  Confirm:'AAAAAwAAHFoAAAA9Aw==',Up:'AAAAAwAAHFoAAAA5Aw==',Down:'AAAAAwAAHFoAAAA6Aw==',
+  Right:'AAAAAwAAHFoAAAA8Aw==',Left:'AAAAAwAAHFoAAAA7Aw==',Home:'AAAAAwAAHFoAAABCAw==',
+  Options:'AAAAAwAAHFoAAAA/Aw==',Return:'AAAAAwAAHFoAAABDAw==',Power:'AAAAAwAAHFoAAAAVAw==',
+  Display:'AAAAAwAAHFoAAABBAw==',Audio:'AAAAAwAAHFoAAABkAw==',SubTitle:'AAAAAwAAHFoAAABjAw==',
+  Play:'AAAAAwAAHFoAAAAaAw==',Stop:'AAAAAwAAHFoAAAAYAw==',Pause:'AAAAAwAAHFoAAAAZAw==',
+  Rewind:'AAAAAwAAHFoAAAAbAw==',Forward:'AAAAAwAAHFoAAAAcAw==',Prev:'AAAAAwAAHFoAAABXAw==',
+  Next:'AAAAAwAAHFoAAABWAw==',Replay:'AAAAAwAAHFoAAAB2Aw==',Advance:'AAAAAwAAHFoAAAB1Aw==',
+  Angle:'AAAAAwAAHFoAAABlAw==',TopMenu:'AAAAAwAAHFoAAAAsAw==',PopupMenu:'AAAAAwAAHFoAAAApAw==',
+  Eject:'AAAAAwAAHFoAAAAWAw==',Netflix:'AAAAAwAAHFoAAABLAw==',Mode3D:'AAAAAwAAHFoAAABNAw=='
+};
+
+async function sendBdKey(name){
+  const code=bdpCommands[name];
+  if(!code){notify(name+' unavailable');return;}
+  try{
+    const r=await bdpIrcc(code);
+    if(!r.ok) notify('Blu-ray command failed');
+  }catch(e){
+    console.error(e);
+    notify('Blu-ray unavailable');
+  }
+}
+bdButtons.forEach(btn=>btn.addEventListener('click',()=>sendBdKey(btn.dataset.bdkey)));
+
+tvButtons.forEach(btn=>btn.addEventListener('click',async()=>{
+  const key=btn.dataset.tvkey;
+  if(!irccMap[key]){await loadIrccMap()}
+  const code=irccMap[key];
+  if(!code){notify(key+' unavailable');return}
+  try{
+    const r=await tvIrcc(code);
+    if(!r.ok){
+      notify('TV command failed');
+      return;
+    }
+
+    // Give immediate visual feedback for HDMI buttons.
+    // The normal status poll then confirms/corrects it from the TV.
+    if(btn.dataset.tvinput) setTvActiveInput(btn.dataset.tvinput);
+    setTimeout(checkTvNowPlaying,700);
+    setTimeout(checkTvNowPlaying,1800);
+  }catch(e){notify('TV command failed')}
+}));
+
+
+let activeTvAppUri='';
+let activeTvAppTitle='';
+
+function normalizeTvSource(value){
+  const raw=String(value||'').toLowerCase();
+
+  // Sony BRAVIA commonly reports HDMI as:
+  // extInput:hdmi?port=1
+  // The old normalization stripped punctuation first, turning that into
+  // "extinputhdmiport1", which never matched "hdmi1".
+  let m=raw.match(/hdmi[^0-9]*port[^0-9]*([1-4])/i);
+  if(m) return 'hdmi'+m[1];
+
+  // Other firmware may report hdmi:1, hdmi 1, HDMI1, etc.
+  m=raw.match(/hdmi[^0-9]*([1-4])/i);
+  if(m) return 'hdmi'+m[1];
+
+  const s=raw.replace(/[^a-z0-9]/g,'');
+  if(s.includes('hdmi1')) return 'hdmi1';
+  if(s.includes('hdmi2')) return 'hdmi2';
+  if(s.includes('hdmi3')) return 'hdmi3';
+  if(s.includes('hdmi4')) return 'hdmi4';
+  return '';
+}
+
+function setTvActiveInput(value){
+  const active=normalizeTvSource(value);
+  document.querySelectorAll('[data-tvinput]').forEach(btn=>{
+    btn.classList.toggle('tv-source-active', !!active && btn.dataset.tvinput===active);
+  });
+}
+
+function refreshActiveAppRows(){
+  document.querySelectorAll('#appMenu .app-row').forEach(row=>{
+    const uri=String(row.dataset.appUri||'');
+    const title=String(row.dataset.appTitle||'').toLowerCase();
+    row.classList.toggle(
+      'app-active',
+      (!!activeTvAppUri && uri===activeTvAppUri) ||
+      (!!activeTvAppTitle && title===activeTvAppTitle.toLowerCase())
+    );
+  });
+}
+
+async function tvAvContentPost(body){
+  return fetch('/tv/avcontent',{
+    method:'POST',
+    cache:'no-store',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(body)
+  });
+}
+
+async function checkTvNowPlaying(){
+  let info=null;
+
+  // Preferred BRAVIA method for active HDMI/internal content.
+  try{
+    const r=await tvAvContentPost({
+      method:'getPlayingContentInfo',
+      id:81,
+      params:[],
+      version:'1.0'
+    });
+    if(r.ok){
+      const d=await r.json().catch(()=>null);
+      if(d && !d.error && Array.isArray(d.result) && d.result[0]) info=d.result[0];
+    }
+  }catch(e){}
+
+  if(info){
+    const uri=String(info.uri||'');
+    const title=String(info.title||info.source||'');
+    setTvActiveInput(uri+' '+title);
+
+    // Internal apps sometimes report a title/URI here.
+    if(!normalizeTvSource(uri+' '+title) && title){
+      activeTvAppTitle=title;
+    }
+  }
+
+  // appControl exposes active-app state on many current BRAVIAs.
+  try{
+    const r=await tvAppPost({
+      method:'getApplicationStatusList',
+      id:82,
+      params:[],
+      version:'1.0'
+    });
+    if(r.ok){
+      const d=await r.json().catch(()=>null);
+      if(d && !d.error && Array.isArray(d.result)){
+        const flat=d.result.flat ? d.result.flat(Infinity) : d.result;
+        const active=flat.find && flat.find(x=>x && typeof x==='object' &&
+          (String(x.status||'').toLowerCase()==='running' ||
+           String(x.status||'').toLowerCase()==='foreground' ||
+           x.active===true));
+        if(active){
+          activeTvAppUri=String(active.uri||'');
+          activeTvAppTitle=String(active.title||active.name||'');
+          setTvActiveInput('');
+        }
+      }
+    }
+  }catch(e){}
+
+  refreshActiveAppRows();
+}
+
+async function checkBdpDisc(){
+  const pill=document.getElementById('bdpDiscStatus');
+  if(!pill) return;
+
+  try{
+    const r=await fetch('/bdp/content-info',{cache:'no-store'});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const xml=await r.text();
+
+    const field=(name)=>{
+      const m=xml.match(new RegExp('field="'+name+'"\\s+value="([^"]*)"', 'i'));
+      return m ? m[1] : '';
+    };
+
+    const source=field('source');
+    const mediaType=field('mediaType');
+    const mediaFormat=field('mediaFormat');
+    const raw=(mediaType||source||'').trim();
+
+    if(!raw){
+      pill.textContent='NO DISC';
+      pill.classList.remove('present');
+      pill.classList.add('empty');
+      return;
+    }
+
+    let label=raw.toUpperCase();
+    if(/blu.?ray/i.test(raw) || /^bd/i.test(raw)) label='BLU-RAY';
+    else if(/dvd/i.test(raw)) label='DVD';
+    else if(/cd/i.test(raw)) label='CD';
+
+    pill.textContent='DISC: '+label;
+    if(mediaFormat && !/^(video|audio)$/i.test(label)) pill.title=mediaFormat;
+    pill.classList.add('present');
+    pill.classList.remove('empty');
+  }catch(e){
+    // If the player is off, don't call that "no disc".
+    pill.textContent=bdpPowerState==='off' ? 'DISC: PLAYER OFF' : 'DISC: UNKNOWN';
+    pill.classList.remove('present','empty');
+  }
+}
+
+function setPowerState(state){powerState=state;powerBtn.classList.remove('on','off','unknown');powerBtn.classList.add(state);powerBtn.textContent=state==='on'?'POWER OFF':state==='off'?'POWER ON':'POWER …'}
+async function checkPower(){try{const r=await avrPost({type:'http_get',packet:[{id:nextId(),feature:'main.power'}]});if(r.status===519){setPowerState('off');return}if(!r.ok){setPowerState('unknown');return}const d=await r.json().catch(()=>null),p=d&&d.packet&&d.packet[0],v=p&&String(p.value).toLowerCase();setPowerState(v==='off'?'off':'on')}catch(e){setPowerState('unknown')}}
+async function avrSend(feature,value){return avrPost({type:'http_set',packet:[{id:nextId(),feature:feature,value:value}]})}
+async function cmd(feature,value){try{const r=await avrSend(feature,value);if(r.status!==200&&r.status!==519)notify('Receiver error '+r.status)}catch(e){notify('Receiver unavailable')}}
+function pulse(feature){cmd(feature,'pulse')}
+async function powerToggle(){
+  powerBtn.disabled=true;
+  try{
+    let state=powerState;
+    if(state==='unknown'){
+      await checkPower();
+      state=powerState;
+    }
+
+    let r;
+    if(state==='off'){
+      r=await avrSend('main.power','on');
+      if(r.status===200||r.status===519){
+        setPowerState('on');
+        notify('Powering on');
+      }else{
+        notify('Wake error '+r.status);
+      }
+    }else{
+      // Exact native command verified against the receiver through nginx.
+      r=await avrSend('GUI.power','main');
+      if(r.status===200||r.status===519){
+        setPowerState('off');
+        notify('Powering off');
+      }else{
+        notify('Power error '+r.status);
+      }
+    }
+
+    setTimeout(checkPower,1500);
+    setTimeout(checkPower,4000);
+  }catch(e){
+    console.error('Receiver power error:',e);
+    notify('Receiver unavailable');
+  }finally{
+    setTimeout(()=>powerBtn.disabled=false,500);
+  }
+}
+function normalizeInput(value){const v=String(value||'').toLowerCase().replace(/[^a-z0-9]/g,'');if(v.includes('bddvd')||v==='bd'||v==='dvd')return'bddvd';if(v.includes('sat')||v.includes('catv'))return'sat';if(v.includes('game'))return'game';if(v.includes('video'))return'video';if(v.includes('aux'))return'aux';if(v==='tv'||v.includes('tvaudio'))return'tv';return null}
+function setActiveInput(input){inputButtons.forEach(b=>b.classList.toggle('input-active',b.dataset.input===input))}
+async function checkInput(){try{const r=await avrPost({type:'http_get',packet:[{id:nextId(),feature:'main.input'}]});if(!r.ok)return;const d=await r.json().catch(()=>null),p=d&&d.packet&&d.packet[0];if(p){const i=normalizeInput(p.value);if(i)setActiveInput(i)}}catch(e){}}
+async function selectInput(feature,input){setActiveInput(input);try{const r=await avrSend(feature,'main');if(r.status!==200&&r.status!==519)notify('Receiver error '+r.status);setTimeout(checkInput,500)}catch(e){notify('Receiver unavailable')}}
+function setAudioOutputState(state){audioOutputState=state;audioOutputBtn.classList.remove('receiver','tv','both','unknown');audioOutputBtn.classList.add(state);audioOutputBtn.textContent=state==='receiver'?'USE TV SPEAKERS':state==='tv'?'USE RECEIVER':state==='both'?'USE TV ONLY':'AUDIO …'}
+function findOutputTerminal(obj){if(!obj||typeof obj!=='object')return null;if(Array.isArray(obj)){for(const i of obj){const f=findOutputTerminal(i);if(f)return f}return null}if(obj.target==='outputTerminal')return obj.currentValue||obj.value||null;for(const k of Object.keys(obj)){const f=findOutputTerminal(obj[k]);if(f)return f}return null}
+async function checkAudioOutput(){try{const r=await tvAudioPost({method:'getSoundSettings',id:73,params:[{target:'outputTerminal'}],version:'1.1'});if(!r.ok){setAudioOutputState('unknown');return}const d=await r.json().catch(()=>null),v=findOutputTerminal(d);if(v==='speaker')setAudioOutputState('tv');else if(v==='speaker_hdmi')setAudioOutputState('both');else if(v==='audioSystem'||v==='hdmi')setAudioOutputState('receiver');else setAudioOutputState('unknown')}catch(e){setAudioOutputState('unknown')}}
+async function setTvAudioOutput(value){const r=await tvAudioPost({method:'setSoundSettings',id:5,params:[{settings:[{target:'outputTerminal',value:value}]}],version:'1.1'});if(!r.ok)throw new Error('TV HTTP '+r.status);const d=await r.json().catch(()=>null);if(d&&d.error)throw new Error(JSON.stringify(d.error))}
+async function toggleAudioOutput(){audioOutputBtn.disabled=true;try{let state=audioOutputState;if(state==='unknown'){await checkAudioOutput();state=audioOutputState}if(state==='receiver'){await setTvAudioOutput('speaker');setAudioOutputState('tv');notify('TV speakers')}else{await setTvAudioOutput('audioSystem');setAudioOutputState('receiver');notify('Receiver / ARC')}setTimeout(checkAudioOutput,700);setTimeout(checkAudioOutput,2200)}catch(e){setAudioOutputState('unknown');notify('TV audio control failed')}finally{setTimeout(()=>audioOutputBtn.disabled=false,500)}}
+
+checkPower();checkInput();checkAudioOutput();checkTvPower();checkBdpPower();checkBdpDisc();checkTvNowPlaying();loadIrccMap();loadTvApps();
+setInterval(checkPower,10000);setInterval(checkInput,5000);setInterval(checkAudioOutput,5000);setInterval(checkTvPower,5000);setInterval(checkBdpPower,5000);setInterval(checkBdpDisc,5000);setInterval(checkTvNowPlaying,5000);
+</script>
+</body>
+</html>

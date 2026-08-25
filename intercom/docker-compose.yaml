@@ -1,0 +1,22 @@
+services:
+  intercom:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: whole-house-intercom:latest
+    container_name: sonance-intercom
+    restart: unless-stopped
+    ports:
+      - "${INTERCOM_PORT:-8089}:8089"
+    environment:
+      PULSE_SERVER: "unix:/var/run/pulse/native"
+      PULSE_SINK: "${PULSE_SINK}"
+      RECEIVER_URL: "http://${AVR_HOST}/request.cgi"
+      INTERCOM_INPUT: "${INTERCOM_INPUT:-sat}"
+      DATA_DIR: "/data"
+    volumes:
+      - ./data:/data
+      - ./templates:/app/templates:ro
+      - /var/run/pulse:/var/run/pulse
+    group_add:
+      - "${AUDIO_GID:-10}"
